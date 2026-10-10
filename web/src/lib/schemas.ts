@@ -159,3 +159,50 @@ export const ContentBrief = z.object({
   doNot: z.array(z.string()).describe("Điều writer phải tránh"),
 });
 export type ContentBrief = z.infer<typeof ContentBrief>;
+
+/* ───────────── Sprint 3: Article & Score ───────────── */
+
+export const CriterionStatus = z.enum(["pass", "warn", "fail"]);
+
+/** Một tiêu chí chấm điểm — dùng chung cho rule engine (source=rule) và Claude (source=ai). */
+export const ScoreCriterion = z.object({
+  id: z.string().describe("slug ổn định, vd: kw-in-title, answer-first"),
+  group: z.enum(["seo", "geo"]),
+  label: z.string(),
+  status: CriterionStatus,
+  reason: z.string().describe("Vì sao đạt/không đạt, có dẫn chứng từ bài"),
+  fix: z.string().describe("Hướng dẫn sửa cụ thể để gửi cho Writer; chuỗi rỗng nếu pass"),
+  source: z.enum(["rule", "ai"]),
+  weight: z.number().describe("Trọng số 1–5"),
+});
+export type ScoreCriterion = z.infer<typeof ScoreCriterion>;
+
+/** Output có cấu trúc của bước chấm bằng Claude — chỉ các tiêu chí ngữ nghĩa (GEO/E-E-A-T). */
+export const AiScoreOutput = z.object({
+  criteria: z.array(
+    z.object({
+      id: z.enum(["answer-first", "citability", "eeat-signals", "entity-clarity", "freshness", "machine-readability", "hallucination-risk", "intent-match"]),
+      status: CriterionStatus,
+      reason: z.string(),
+      fix: z.string(),
+    }),
+  ),
+  summary: z.string().describe("2–3 câu nhận xét tổng thể"),
+});
+export type AiScoreOutput = z.infer<typeof AiScoreOutput>;
+
+export type ScoreReport = {
+  seoScore: number; // 0–100
+  geoScore: number; // 0–100
+  criteria: ScoreCriterion[];
+  summary: string;
+  model: string | null;
+};
+
+/** Sự kiện stream từ API viết bài (SSE: `data: <json>\n\n`). */
+export type WriterEvent =
+  | { type: "delta"; text: string }
+  | { type: "done"; articleId: string; words: number }
+  | { type: "error"; message: string };
+
+export type WriterMode = "write" | "fix" | "rewrite";
