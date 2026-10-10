@@ -1,0 +1,60 @@
+:root {
+  /* Containers (measured on blog @1440) */
+  --container: 1440px;          /* app shell max */
+  --container-content: 1288px;  /* blog / marketing content */
+  --container-hero: 1040px;     /* article cover image */
+  --measure: 720px;             /* article reading column */
+  --page-pad-x: clamp(16px, 10.67px + 1.48vw, 32px); /* @kind other */           /* mobile → keep ≥ 20 */
+  --page-pad-top: clamp(24px, 13.33px + 2.96vw, 56px); /* @kind other */
+  --section-gap: clamp(40px, 29.33px + 2.96vw, 72px); /* @kind other */          /* between blog sections */
+  --section-gap-s: clamp(28px, 24px + 1.11vw, 40px); /* @kind other */        /* between article H2 blocks */
+
+  /* Grids */
+  --grid-card-min: clamp(240px, 206.67px + 9.26vw, 340px); /* @kind other */  /* 1 col phone → 2 @600 → 3 @1024+ */
+  --grid-col-gap: clamp(16px, 12px + 1.11vw, 28px); /* @kind other */
+  --grid-row-gap: clamp(32px, 21.33px + 2.96vw, 64px); /* @kind other */
+  --grid-media-gap: clamp(8px, 6.67px + 0.37vw, 12px); /* @kind other */       /* dense media feed / masonry */
+  --feature-split: 1.22fr 1fr; /* @kind other */  /* legacy; featured now flex-wraps: image flex 1.22 1 420px, panel 1 1 340px */
+
+  /* Viewport & device */
+  --container-min: 320px;       /* smallest supported viewport */
+  --vh-screen: 100vh; /* @kind other */           /* → 100dvh where supported (below) */
+  --safe-top: env(safe-area-inset-top, 0px); /* @kind other */
+  --safe-right: env(safe-area-inset-right, 0px); /* @kind other */
+  --safe-bottom: env(safe-area-inset-bottom, 0px); /* @kind other */
+  --safe-left: env(safe-area-inset-left, 0px); /* @kind other */
+  --tap-min: 44px;              /* touch target floor on coarse pointers */
+
+  /* Fixed chrome (--header-h lives in responsive.css) */
+  --promptbar-max: 820px;
+
+  /* Breakpoints (reference — @media in responsive.css + useBreakpoint() use these literals) */
+  --bp-sm: 600px;
+  --bp-md: 900px;
+  --bp-lg: 1200px;
+  --bp-xl: 1440px;
+
+  /* Aspect ratios seen in content */
+  --ratio-cover: 16 / 9; /* @kind other */        /* article hero 3840×2160, inline 2720×1536 */
+  --ratio-inline-photo: 3 / 2; /* @kind other */  /* inline photo 2000×1341 */
+  --ratio-card: 16 / 9; /* @kind other */         /* blog grid card */
+  --ratio-portrait: 4 / 5; /* @kind other */      /* feed tile */
+  --ratio-story: 9 / 16; /* @kind other */        /* vertical video tile */
+  --ratio-cinema: 21 / 9; /* @kind other */       /* hero reel / cinematic */
+  --ratio-square: 1 / 1; /* @kind other */        /* preset thumb */
+
+  /* Layering */
+  --z-base: 0; /* @kind other */
+  --z-sticky: 30; /* @kind other */               /* header, prompt bar */
+  --z-dropdown: 20; /* @kind other */
+  --z-toast: 40; /* @kind other */
+  --z-tooltip: 50; /* @kind other */
+  --z-modal: 100; /* @kind other */
+
+  /* Opacity */
+  --opacity-disabled: 0.4; /* @kind other */
+  --opacity-muted: 0.6; /* @kind other */
+}
+@supports (height: 100dvh) {
+  :root { --vh-screen: 100dvh; /* @kind other */ }
+}

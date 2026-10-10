@@ -1,0 +1,24 @@
+# SEO Studio — web
+
+Next.js 15 + TypeScript · Anthropic SDK · Prisma (SQLite dev) · AiDoIt Design System tokens.
+
+## Chạy local
+```bash
+cd web
+cp .env.example .env        # điền ANTHROPIC_API_KEY
+npm install
+npx prisma db push          # tạo prisma/dev.db
+npm run dev                 # http://localhost:3000
+```
+
+## Cấu trúc
+```
+prompts/standards-2026.md   bộ tiêu chuẩn SEO/GEO 2026 (system prompt, cache)
+prisma/schema.prisma        Project · Keyword · Analysis · AiUsage
+src/lib/claude.ts           client, model, ghi chi phí, xử lý refusal
+src/lib/analyze.ts          pipeline: web search SERP → structured analysis (Zod)
+src/lib/schemas.ts          Zod: KeywordAnalysis, EntityProfile…
+src/styles/tokens/*.css     token AiDoIt v1.13.2 (copy nguyên, font qua next/font)
+src/components/ui/*         Button, Field, Badge, Chip, Progress, Panel, Table…
+src/app/                    / (dự án) · /projects/[id] · /projects/[id]/analyses/[id] · /usage
+```

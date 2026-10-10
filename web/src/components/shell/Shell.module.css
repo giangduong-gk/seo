@@ -1,0 +1,10 @@
+.header { position: sticky; top: 0; z-index: var(--z-sticky); height: var(--header-h); padding-top: var(--safe-top); background: var(--header-bg); backdrop-filter: var(--blur-header); -webkit-backdrop-filter: var(--blur-header); border-bottom: 1px solid var(--line-1); }
+.inner { height: 100%; max-width: var(--container); margin: 0 auto; padding: 0 var(--page-pad-x); display: flex; align-items: center; gap: var(--nav-gap); }
+.wordmark { font: 800 20px/1 var(--font-display); font-stretch: var(--display-stretch); text-transform: uppercase; letter-spacing: 0.02em; color: var(--fg-1); display: inline-flex; align-items: center; }
+.wordmark b { color: var(--volt); font-weight: inherit; }
+.nav { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.link { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: var(--radius-s); color: var(--fg-2); font: 500 13px/1 var(--font-body); transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.link:hover { background: var(--state-2); color: var(--fg-1); }
+.active { color: var(--fg-1); background: var(--state-3); }
+.main { min-height: calc(var(--vh-screen) - var(--header-offset)); }
+.footer { max-width: var(--container); margin: 0 auto; padding: var(--space-6) var(--page-pad-x) calc(var(--space-6) + var(--safe-bottom)); display: flex; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; font: var(--text-caption); color: var(--text-muted); border-top: 1px solid var(--line-1); }

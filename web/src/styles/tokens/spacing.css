@@ -1,0 +1,35 @@
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-14: 56px;
+  --space-20: 80px;
+  --space-30: 120px;
+
+  --radius-xs: 6px;    /* badge, chip */
+  --radius-s: 10px;    /* button, input */
+  --radius-m: 14px;    /* card */
+  --radius-l: 20px;    /* panel, modal, hero */
+  --radius-pill: 999px;
+
+  --shadow-none: none; /* @kind other */
+  --shadow-raised: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-modal: 0 24px 80px rgba(0,0,0,0.6);
+  --glow-volt: 0 0 0 1px rgba(255,234,0,0.35), 0 0 24px rgba(255,226,0,0.45), 0 0 64px rgba(255,196,0,0.25); /* @kind other */
+
+  --blur-header: saturate(140%) blur(20px); /* @kind other */
+  --scrim-bottom: linear-gradient(180deg, rgba(3,3,4,0) 40%, rgba(3,3,4,0.85) 100%); /* @kind color */
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* @kind other */
+  --dur-fast: 120ms; /* @kind other */
+  --dur-base: 180ms; /* @kind other */
+  --dur-media: 400ms; /* @kind other */
+
+  --container: 1440px;
+  --gutter: 24px;
+}

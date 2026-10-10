@@ -1,0 +1,17 @@
+/* Data visualisation — categorical palette tuned for dark surfaces (all ≥ 3:1 on --bg-2), yellow first */
+:root {
+  --chart-1: #FFEA00;   /* primary series, highlights */
+  --chart-2: #5AB4FF;
+  --chart-3: #3DDC97;
+  --chart-4: #FF7AB6;
+  --chart-5: #B58CFF;
+  --chart-6: #FF9F43;
+  --chart-seq-1: rgba(255,234,0,0.14);   /* sequential (heatmaps, density) */
+  --chart-seq-2: rgba(255,234,0,0.32);
+  --chart-seq-3: rgba(255,234,0,0.55);
+  --chart-seq-4: rgba(255,234,0,0.78);
+  --chart-seq-5: #FFEA00;
+  --chart-grid: rgba(255,255,255,0.06);
+  --chart-axis: var(--fg-3);
+  --chart-tooltip: var(--bg-3);
+}

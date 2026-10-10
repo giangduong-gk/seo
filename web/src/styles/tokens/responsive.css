@@ -1,0 +1,244 @@
+/* AiDoIt responsive tokens — MOBILE-FIRST.
+   :root base = phone (0–599). Each @media overrides only what changes.
+   Breakpoints: sm 600 · md 900 · lg 1200 · xl 1440 — keep in sync with useBreakpoint().
+   Pattern: inline styles read var(--token); the token switches at a breakpoint → no JS, no classes. */
+:root {
+  /* Column grid */
+  --grid-cols: 4; /* @kind other */
+  --grid-gutter: 16px;
+  --col-full: 4; /* @kind other */
+  --col-half: 4; /* @kind other */
+  --col-third: 4; /* @kind other */
+  --col-quarter: 2; /* @kind other */
+  --col-main: 4; /* @kind other */
+  --col-aside: 4; /* @kind other */
+  --cols-trio: 1; /* @kind other */                 /* 3-up sets (features, steps, plans): never 2 + orphan */
+  --col-head: 4; /* @kind other */                  /* split section header (FAQ) */
+  --col-body: 4; /* @kind other */
+
+  /* Visibility switches — display: var(--show-md) */
+  --show-sm: none; /* @kind other */
+  --hide-sm: flex; /* @kind other */
+  --show-md: none; /* @kind other */
+  --hide-md: flex; /* @kind other */
+  --show-md-block: none; /* @kind other */
+  --show-lg: none; /* @kind other */
+  --hide-lg: flex; /* @kind other */
+
+  /* Split layouts (main + aside) */
+  --split-dir: column; /* @kind other */
+  --aside-position: static; /* @kind other */
+  --aside-max-h: none; /* @kind other */
+
+  /* Chrome */
+  --header-h: 52px;
+  --header-offset: calc(var(--header-h) + var(--safe-top)); /* @kind other */
+  --nav-gap: 12px;
+
+  /* Pattern widths — full-bleed on phones */
+  --rail-width: 100%; /* @kind other */
+  --rail-h: auto; /* @kind other */
+  --page-rail-h: auto; /* @kind other */            /* full-height rail on pages without TopNav */
+  --course-aside-w: 100%; /* @kind other */
+  --acct-nav-w: 100%; /* @kind other */
+  --cms-aside-w: 100%; /* @kind other */
+  --cms-sidebar-pos: fixed; /* @kind other */
+  --cms-sidebar-off: translateX(-100%); /* @kind other */
+  --academy-sidebar-pos: fixed; /* @kind other */
+  --academy-sidebar-z: var(--z-modal);
+  --academy-sidebar-shadow: var(--shadow-modal);
+  --acct-nav-dir: row; /* @kind other */
+  --acct-nav-ox: auto; /* @kind other */
+
+  /* Editorial */
+  --feature-pad: 20px;
+
+  /* Community */
+  --gallery-cols: 2; /* @kind other */
+  --gallery-col-min: 150px;
+  --project-cols: 1; /* @kind other */
+  --detail-dir: column; /* @kind other */
+  --detail-overflow-y: auto; /* @kind other */
+  --detail-stage-flex: 0 0 auto; /* @kind other */
+  --detail-stage-h: calc(var(--vh-screen) * 0.58); /* @kind other */
+  --detail-stage-pad: calc(56px + var(--safe-top)) 12px 12px; /* @kind other */
+  --detail-panel-w: auto; /* @kind other */
+  --detail-panel-inset: 0 8px calc(8px + var(--safe-bottom)); /* @kind other */
+
+  /* Prompt bar — one scrollable control row, Generate pinned right */
+  --promptbar-pad: 12px;
+  --promptbar-gap: 10px;
+  --promptbar-wrap: nowrap; /* @kind other */
+  --promptbar-ox: auto; /* @kind other */
+  /* Always fixed to the viewport bottom; centred in the canvas (right of the rail on md+) */
+  --promptbar-left: var(--page-pad-x);
+  --promptbar-right: var(--page-pad-x);
+  --promptbar-bottom: calc(8px + var(--safe-bottom)); /* @kind other */
+  --promptbar-clearance: 240px;   /* results bottom padding so the bar never covers the last row */
+  --select-anchor: static; /* @kind other */
+  --select-menu-right: 0; /* @kind other */
+
+  /* Bottom sheet → centred dialog on md+ */
+  --sheet-left: 0; /* @kind other */
+  --sheet-right: 0; /* @kind other */
+  --sheet-top: auto; /* @kind other */
+  --sheet-bottom: 0; /* @kind other */
+  --sheet-w: auto; /* @kind other */
+  --sheet-max-h: calc(var(--vh-screen) * 0.88); /* @kind other */
+  --sheet-radius: 20px 20px 0 0; /* @kind other */
+  --sheet-in: translateY(0); /* @kind other */
+  --sheet-out: translateY(100%); /* @kind other */
+  --sheet-out-opacity: 1; /* @kind other */
+  --sheet-safe: var(--safe-bottom);
+
+  /* Preset picker */
+  --picker-overlay-pad: 8px;
+  --picker-dir: column; /* @kind other */
+  --picker-nav-w: auto; /* @kind other */
+  --picker-nav-dir: row; /* @kind other */
+  --picker-nav-ox: auto; /* @kind other */
+  --picker-nav-oy: hidden; /* @kind other */
+  --picker-nav-border-r: 0; /* @kind other */
+  --picker-nav-border-b: 1px solid var(--line-1); /* @kind other */
+  --picker-tile-min: 136px;
+  --store-card-min: 150px;
+  --cms-cat-cols: 18px minmax(0, 1fr) auto auto; /* @kind other */   /* # · name · [desc lg] · [count sm] · switch · menu — hidden cells take no track */
+  --show-sm-block: none; /* @kind other */
+  --show-lg-block: none; /* @kind other */
+  --cms-editor-aside-w: 100%; /* @kind other */      /* editor aside: full width when it wraps under the form */        /* 2-up on phones */
+}
+
+@media (min-width: 600px) {
+  :root {
+    --grid-cols: 8; /* @kind other */
+    --grid-gutter: 20px;
+    --col-full: 8; /* @kind other */
+    --col-half: 4; /* @kind other */
+    --col-third: 4; /* @kind other */
+    --col-quarter: 2; /* @kind other */
+    --col-main: 8; /* @kind other */
+    --col-aside: 8; /* @kind other */
+    --col-head: 8; /* @kind other */
+    --col-body: 8; /* @kind other */
+    --show-sm: flex; /* @kind other */
+    --hide-sm: none; /* @kind other */
+    --gallery-cols: 3; /* @kind other */
+    --gallery-col-min: 180px;
+    --project-cols: 2; /* @kind other */
+    --picker-tile-min: 150px;
+    --store-card-min: 200px;
+    --cms-cat-cols: 18px minmax(0, 1fr) auto auto auto; /* @kind other */
+    --show-sm-block: block; /* @kind other */
+  }
+}
+
+@media (min-width: 900px) {
+  :root {
+    --grid-cols: 12; /* @kind other */
+    --grid-gutter: 24px;
+    --col-full: 12; /* @kind other */
+    --col-half: 6; /* @kind other */
+    --col-third: 4; /* @kind other */
+    --col-quarter: 3; /* @kind other */
+    --col-main: 8; /* @kind other */
+    --col-aside: 4; /* @kind other */
+    --cols-trio: 3; /* @kind other */
+    --col-head: 12; /* @kind other */
+    --col-body: 12; /* @kind other */
+    --show-md: flex; /* @kind other */
+    --hide-md: none; /* @kind other */
+    --show-md-block: block; /* @kind other */
+    --split-dir: row; /* @kind other */
+    --aside-position: sticky; /* @kind other */
+    --aside-max-h: calc(var(--vh-screen) - 48px); /* @kind other */
+    --header-h: 56px;
+    --nav-gap: 28px;
+    --rail-width: 280px;
+    --rail-h: calc(var(--vh-screen) - var(--header-offset)); /* @kind other */
+    --page-rail-h: var(--vh-screen);
+    --course-aside-w: 340px;
+    --acct-nav-w: 240px;
+    --cms-aside-w: 340px;
+    --cms-sidebar-pos: sticky; /* @kind other */
+    --cms-sidebar-off: none; /* @kind other */
+    --academy-sidebar-pos: sticky; /* @kind other */
+    --academy-sidebar-z: auto; /* @kind other */
+    --academy-sidebar-shadow: none; /* @kind other */
+    --acct-nav-dir: column; /* @kind other */
+    --acct-nav-ox: visible; /* @kind other */
+    --feature-pad: 24px 24px 24px clamp(24px, 5vw, 64px); /* @kind other */
+    --gallery-cols: 4; /* @kind other */
+    --gallery-col-min: 200px;
+    --project-cols: 3; /* @kind other */
+    --detail-dir: row; /* @kind other */
+    --detail-overflow-y: hidden; /* @kind other */
+    --detail-stage-flex: 1 1 0%; /* @kind other */
+    --detail-stage-h: auto; /* @kind other */
+    --detail-stage-pad: 44px 56px; /* @kind other */
+    --detail-panel-w: clamp(300px, 22vw, 360px); /* @kind other */
+    --detail-panel-inset: 6px;
+    --promptbar-pad: 16px;
+    --promptbar-gap: 14px;
+    --promptbar-wrap: wrap; /* @kind other */
+    --promptbar-ox: visible; /* @kind other */
+    --promptbar-left: calc(var(--rail-width) + 24px); /* @kind other */
+    --promptbar-right: 24px;
+    --promptbar-bottom: calc(20px + var(--safe-bottom)); /* @kind other */
+    --promptbar-clearance: 220px;
+    --select-anchor: relative; /* @kind other */
+    --select-menu-right: auto; /* @kind other */
+    --sheet-left: 50%; /* @kind other */
+    --sheet-right: auto; /* @kind other */
+    --sheet-top: 50%; /* @kind other */
+    --sheet-bottom: auto; /* @kind other */
+    --sheet-w: min(520px, calc(100vw - 40px)); /* @kind other */
+    --sheet-max-h: calc(var(--vh-screen) - 80px); /* @kind other */
+    --sheet-radius: 20px;
+    --sheet-in: translate(-50%, -50%); /* @kind other */
+    --sheet-out: translate(-50%, calc(-50% + 16px)); /* @kind other */
+    --sheet-out-opacity: 0; /* @kind other */
+    --sheet-safe: 0px;
+    --picker-overlay-pad: 20px;
+    --picker-dir: row; /* @kind other */
+    --picker-nav-w: 178px;
+    --picker-nav-dir: column; /* @kind other */
+    --picker-nav-ox: hidden; /* @kind other */
+    --picker-nav-oy: auto; /* @kind other */
+    --picker-nav-border-r: 1px solid var(--line-1); /* @kind other */
+    --picker-nav-border-b: 0; /* @kind other */
+    --picker-tile-min: 170px;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --cms-cat-cols: 18px minmax(160px, 1fr) minmax(0, 1.4fr) auto auto auto; /* @kind other */
+    --show-lg-block: block; /* @kind other */
+    --cms-editor-aside-w: 340px;
+    --col-head: 4; /* @kind other */
+    --col-body: 8; /* @kind other */
+    --show-lg: flex; /* @kind other */
+    --hide-lg: none; /* @kind other */
+    --gallery-cols: 5; /* @kind other */
+    --gallery-col-min: 220px;
+    --project-cols: 4; /* @kind other */
+  }
+}
+
+/* Touch: raise hit targets regardless of width (tablets, touch laptops) */
+@media (pointer: coarse) {
+  :root {
+    --control-h-s: 36px;
+    --control-h-m: 44px;
+    --control-h-l: 48px;
+    --icon-btn-s: 36px;
+    --icon-btn-m: 44px;
+    --icon-btn-l: 48px;
+    --chip-h: 40px;
+    --control-h-s-plus: 40px;
+    --picker-nav-h: 44px;
+    --cms-row-h: 56px;
+    --menu-item-h: 44px;
+    --detail-btn-h: 44px;
+  }
+}

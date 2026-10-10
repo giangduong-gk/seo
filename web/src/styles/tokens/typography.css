@@ -1,0 +1,45 @@
+
+:root {
+  --font-display: var(--nf-archivo), 'Arial Narrow', sans-serif; /* @kind other */ /* use with font-stretch: 75%; weight 800; uppercase */
+  --font-body: var(--nf-inter), system-ui, sans-serif; /* Geist không có glyph tiếng Việt → Inter */ /* @kind other */
+  --font-editorial: var(--nf-inter), system-ui, sans-serif; /* @kind other */ /* blog/news — sentence case, no condensed caps */
+  --font-mono: var(--nf-geist-mono), ui-monospace, monospace; /* @kind other */
+  --display-stretch: 75%; /* @kind other */
+
+  --fs-display-xl: clamp(48px, 32px + 4.44vw, 96px); /* @kind other */
+  --fs-display-l: clamp(36px, 26.67px + 2.59vw, 64px); /* @kind other */
+  --fs-display-m: clamp(30px, 25.33px + 1.3vw, 44px); /* @kind other */
+  --fs-h1: clamp(26px, 24px + 0.56vw, 32px); /* @kind other */
+  --fs-h2: clamp(21px, 20px + 0.28vw, 24px); /* @kind other */
+  --fs-article-h1: clamp(30px, 25.33px + 1.3vw, 44px); /* @kind other */
+  --fs-article: clamp(16px, 15.67px + 0.09vw, 17px); /* @kind other */
+  --fs-article-h2: clamp(22px, 20.67px + 0.37vw, 26px); /* @kind other */
+  --fs-article-h3: clamp(18px, 17.33px + 0.19vw, 20px); /* @kind other */
+  --fs-feature-title: clamp(22px, 20px + 0.56vw, 28px); /* @kind other */
+  --fs-card-title: clamp(17px, 16px + 0.28vw, 20px); /* @kind other */
+  /* Fluid sizes: clamp(min @360, …, max @1440) — no breakpoint jumps */
+  --text-display-xl: 800 var(--fs-display-xl)/0.9 var(--font-display);
+  --text-display-l: 800 var(--fs-display-l)/0.92 var(--font-display);
+  --text-display-m: 800 var(--fs-display-m)/0.95 var(--font-display);
+  --text-h1: 600 var(--fs-h1)/1.1 var(--font-body);
+  --text-h2: 600 var(--fs-h2)/1.2 var(--font-body);
+  --text-h3: 600 18px/1.3 var(--font-body);
+  --text-body: 400 15px/1.5 var(--font-body);
+  --text-body-s: 400 13px/1.45 var(--font-body);
+  --text-caption: 500 12px/1.4 var(--font-body);
+  --text-micro: 600 11px/1.2 var(--font-body); /* uppercase, tracking 0.06em */
+  --text-mono: 500 12px/1.4 var(--font-mono);
+  --text-article-h1: 600 var(--fs-article-h1)/1.1 var(--font-editorial); /* fluid 360→1440 */
+  --text-article: 400 var(--fs-article)/1.7 var(--font-body); /* long-form body */
+  --text-article-h2: 600 var(--fs-article-h2)/1.25 var(--font-body);
+  --text-article-h3: 600 var(--fs-article-h3)/1.3 var(--font-body);
+  --measure: 720px; /* article column */
+  --text-feature-title: 600 var(--fs-feature-title)/1.2 var(--font-editorial);
+  --text-card-title: 600 var(--fs-card-title)/1.3 var(--font-editorial);
+  --text-excerpt: 400 14px/1.6 var(--font-editorial);
+  --text-meta: 400 13px/1.2 var(--font-editorial);
+  --text-pill: 500 12px/1 var(--font-editorial);
+
+  --tracking-display: -0.01em;
+  --tracking-micro: 0.06em;
+}

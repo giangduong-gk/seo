@@ -1,0 +1,66 @@
+// Sprint 1 dùng SQLite để chạy ngay không cần dịch vụ ngoài.
+// Production: đổi provider thành "postgresql" và cập nhật DATABASE_URL (xem docs/PLAN.md).
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id            String     @id @default(cuid())
+  name          String
+  domain        String?
+  industry      String?
+  locale        String     @default("vi-VN")
+  brandVoice    String?
+  entityProfile String?    // JSON: tên doanh nghiệp, sản phẩm, tác giả, sameAs...
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  keywords      Keyword[]
+  analyses      Analysis[]
+  usage         AiUsage[]
+}
+
+model Keyword {
+  id        String     @id @default(cuid())
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  term      String
+  intent    String?
+  source    String     @default("manual")
+  createdAt DateTime   @default(now())
+  analyses  Analysis[]
+
+  @@unique([projectId, term])
+}
+
+model Analysis {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  keywordId String
+  keyword   Keyword  @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  status    String   @default("done") // done | failed | refused
+  model     String
+  research  String?  // ghi chú SERP (text) nếu bật web search
+  result    String?  // JSON KeywordAnalysis
+  error     String?
+  createdAt DateTime @default(now())
+}
+
+model AiUsage {
+  id              String   @id @default(cuid())
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  feature         String
+  model           String
+  inputTokens     Int
+  outputTokens    Int
+  cacheReadTokens Int      @default(0)
+  cacheWriteTokens Int     @default(0)
+  costUsd         Float
+  createdAt       DateTime @default(now())
+}

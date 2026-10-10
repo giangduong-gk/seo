@@ -1,0 +1,138 @@
+/* Stepped (breakpoint) values for these patterns live in responsive.css */
+:root {
+  /* Control heights */
+  --control-h-s: 32px;
+  --control-h-m: 40px;
+  --control-h-l: 48px;
+  --control-pad-s: 12px;
+  --control-pad-m: 16px;
+  --control-pad-l: 22px;
+  --icon-btn-s: 28px;
+  --icon-btn-m: 36px;
+  --icon-btn-l: 44px;
+  --icon-s: 14px;
+  --icon-m: 16px;
+  --icon-l: 20px;
+  --icon-xl: 24px;
+
+  --control-h-s-plus: 36px;          /* prompt-bar controls: select, chip, generate share one height */
+  --control-gap: 8px;
+  --radius-control: 10px;
+  --radius-menu: 12px;               /* dropdown = control radius + 2 (4px inner pad) */
+  --radius-menu-item: 8px;
+  --menu-item-h: 34px;               /* 44px on touch */
+  --rail-pad: 20px;
+  --rail-gap: 24px;
+  --rail-label-gap: 12px;
+  --grid-media-gap-s: 8px;           /* preset grid inside rail */
+  --media-pad: 14px;
+
+  /* Generation results — Pinterest-style masonry, zoomable */
+  --gen-pad-x: clamp(6px, 4px + 0.56vw, 12px); /* @kind other */
+  --gen-gap: clamp(6px, 4.67px + 0.37vw, 10px); /* @kind other */   /* 6 @360 → 10 @1440 */
+  --gen-radius: 12px;
+  --gen-tile-min: 140px;          /* zoom 0 */
+  --gen-tile-max: 520px;          /* zoom 100 */
+  --gen-cols-min: 2; /* @kind other */
+  --gen-slider-w: 120px;
+
+  /* Preset picker ("Choose style") — measured @1x */
+  --picker-w: 1040px;
+  --picker-h: 780px;
+  --picker-pad: 8px;
+  --picker-header-h: 54px;
+  --radius-picker: 18px;
+  --radius-picker-inner: 14px;
+  --picker-nav-pad: 12px;
+  --picker-nav-h: 36px;
+  --picker-content-pad: 16px;
+  --picker-tile-ratio: 3 / 4; /* @kind other */
+  --radius-picker-tile: 12px;
+  --picker-gap-x: 8px;
+  --picker-gap-y: 16px;
+  --picker-label-gap: 12px;
+  --picker-label-inset: 6px;
+
+  /* Community gallery — measured @1x (screens 2×) */
+  --gallery-pad-x: clamp(16px, 11.33px + 1.3vw, 30px); /* @kind other */
+  --gallery-section-gap: clamp(36px, 29.33px + 1.85vw, 56px); /* @kind other */
+  --gallery-head-gap: 20px;
+  --gallery-gap: clamp(8px, 6.67px + 0.37vw, 12px); /* @kind other */
+  --project-col-min: 260px;     /* below this it drops to 3 → 2 → 1 */
+  --project-gap: clamp(10px, 8.33px + 0.46vw, 15px); /* @kind other */
+  --radius-gallery: 10px;
+
+  /* Prompt detail (lightbox + side panel) */
+  --detail-panel-pad: 6px;
+  --radius-detail-panel: 16px;
+  --detail-panel-bg: rgba(28,29,33,0.82);
+  --detail-block-bg: rgba(255,255,255,0.04);
+  --radius-detail-block: 12px;
+  --detail-label-h: 32px;
+  --detail-btn-h: 36px;
+  --detail-btn-gap: 6px;
+
+  /* Academy (e-learning) */
+  --academy-card-min: 300px;     /* course grid: 3 cols @1288 */
+  --academy-sidebar-w: 320px;    /* lesson curriculum rail */
+  --lesson-max: 960px;           /* player + lesson column */
+  --player-radius: 14px;
+  --player-controls-h: 40px;
+  --progress-h: 4px;
+
+  /* Auth + account settings */
+  --auth-form-w: 380px;
+  --auth-gap: 20px;
+  --auth-media-inset: 12px;
+  --acct-main-max: 820px;
+  --acct-gap: clamp(24px, 16px + 2.22vw, 48px); /* @kind other */
+  --acct-section-gap: 16px;
+  --acct-card-pad: clamp(16px, 13.33px + 0.74vw, 24px); /* @kind other */
+
+  /* Admin CMS */
+  --cms-sidebar-w: 240px;
+  --cms-main-pad: clamp(16px, 12px + 1.11vw, 28px) var(--page-pad-x) calc(80px + var(--safe-bottom)); /* @kind other */
+  --cms-main-max: 1280px;
+  --cms-section-gap: 24px;       /* page head → content → sections */
+  --cms-grid-gap: 16px;          /* KPI / panel grids */
+  --cms-panel-radius: 14px;
+  --cms-panel-head-h: 52px;      /* header row: title left, action right */
+  --cms-panel-pad-x: 20px;       /* shared by header, body and flush rows → titles and row content align */
+  --cms-panel-pad-y: 20px;
+  --cms-panel-flush-y: 4px;      /* list panels: rows run edge-to-edge */
+  --cms-panel-gap: 14px;
+  --cms-row-h: 52px;
+  --cms-panel-title: 600 14px/1.3 var(--font-body);
+
+  /* Radii by role (aliases of the scale) */
+  --radius-button: 10px;
+  --radius-button-editorial: 8px;   /* "Read now" */
+  --radius-input: 10px;
+  --radius-media: 14px;             /* app feed tile */
+  --radius-card-editorial: 12px;    /* blog grid image */
+  --radius-feature: 16px;           /* featured blog card, CTA card */
+  --radius-panel: 20px;             /* dialog, prompt bar, pricing card */
+  --radius-badge: 5px;
+
+  /* Pill (category tag, chip) */
+  --pill-h: 24px;
+  --pill-pad-x: 10px;
+  --chip-h: 36px;
+  --chip-pad-x: 12px;  /* chips inside prompt bar match select height + radius */
+  --badge-h: 18px;
+
+  /* Editorial card internals */
+  --feature-title-gap: clamp(24px, 4vw, 56px); /* @kind other */        /* pill row → title */
+  --card-text-inset: 12px;          /* title indent under image */
+  --card-title-gap: 18px;           /* image → title */
+  --card-meta-gap: clamp(28px, 16px + 3.33vw, 64px); /* @kind other */            /* title → meta (min) */
+  --card-title-lines: 2; /* @kind other */
+  --pill-offset: 12px;              /* pill from image corner */
+
+  /* Media overlays */
+  --glass-bg: rgba(10,11,12,0.55);
+  --glass-blur: blur(12px); /* @kind other */
+  --header-bg: rgba(3,3,4,0.72);
+  --hover-zoom: 1.04; /* @kind other */
+  --hover-zoom-editorial: 1.03; /* @kind other */
+}

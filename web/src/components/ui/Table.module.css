@@ -1,0 +1,7 @@
+.scroll { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font: var(--text-body-s); }
+.table th { text-align: left; font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--text-muted); padding: 10px var(--cms-panel-pad-x); border-bottom: 1px solid var(--line-1); white-space: nowrap; }
+.table td { padding: 12px var(--cms-panel-pad-x); border-bottom: 1px solid var(--line-1); vertical-align: top; color: var(--fg-2); }
+.table td:first-child { color: var(--fg-1); font-weight: 500; }
+.table tr:last-child td { border-bottom: 0; }
+.table tbody tr:hover td { background: var(--state-1); }

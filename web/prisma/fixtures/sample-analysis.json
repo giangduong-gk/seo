@@ -1,0 +1,66 @@
+{
+  "keyword": "iphone 17 pro max giá bao nhiêu",
+  "language": "vi-VN",
+  "intent": "commercial",
+  "intentConfidence": 0.86,
+  "intentReasoning": "Người tìm đang ở giai đoạn cân nhắc mua: muốn biết giá niêm yết, giá thực tế tại cửa hàng và khuyến mãi trước khi quyết định. SERP hiện trộn bài báo giá và trang sản phẩm.",
+  "audience": "Người dùng Việt Nam 22–40 tuổi đang cân nhắc nâng cấp lên iPhone 17 Pro Max, quan tâm giá chính hãng VN/A, trả góp và chênh lệch giữa các đại lý.",
+  "searchVolumeEstimate": "high",
+  "difficultyEstimate": 62,
+  "recommendedAngle": "Bảng giá cập nhật theo ngày cho từng dung lượng + giải thích vì sao giá khác nhau giữa đại lý, kèm công cụ so sánh trả góp. Trả lời số tiền ngay câu đầu để AI trích dẫn.",
+  "recommendedFormat": "Bài giá cập nhật (price guide) có bảng so sánh + FAQ",
+  "keywords": [
+    { "term": "iphone 17 pro max giá bao nhiêu", "role": "primary", "note": null },
+    { "term": "giá iphone 17 pro max", "role": "primary", "note": "Biến thể đảo trật tự" },
+    { "term": "iphone 17 pro max 256gb giá", "role": "secondary", "note": null },
+    { "term": "iphone 17 pro max 1tb giá", "role": "secondary", "note": null },
+    { "term": "iphone 17 pro max chính hãng vn/a", "role": "secondary", "note": "Thực thể quan trọng với thị trường VN" },
+    { "term": "iphone 17 pro max trả góp 0%", "role": "long_tail", "note": null },
+    { "term": "iphone 17 pro max giá rẻ nhất ở đâu", "role": "long_tail", "note": null },
+    { "term": "iphone 17 pro max có đáng mua không", "role": "question", "note": null },
+    { "term": "khi nào iphone 17 pro max giảm giá", "role": "question", "note": null },
+    { "term": "so sánh giá iphone 17 pro max các đại lý", "role": "ai_prompt", "note": "Cách người dùng hỏi chatbot" },
+    { "term": "nên mua iphone 17 pro max hay 16 pro max", "role": "ai_prompt", "note": null }
+  ],
+  "entities": [
+    { "name": "iPhone 17 Pro Max", "type": "Product", "relation": "Sản phẩm chính của truy vấn", "schemaHint": "Product + Offer (price, priceCurrency VND)" },
+    { "name": "Apple", "type": "Organization", "relation": "Nhà sản xuất", "schemaHint": "Organization, sameAs apple.com" },
+    { "name": "Mã VN/A", "type": "Concept", "relation": "Hàng chính hãng phân phối tại Việt Nam", "schemaHint": "DefinedTerm" },
+    { "name": "Trả góp 0%", "type": "Concept", "relation": "Hình thức thanh toán ảnh hưởng quyết định", "schemaHint": "Offer.eligibleTransactionVolume" }
+  ],
+  "serp": {
+    "winningFormats": ["Bài giá cập nhật", "Trang sản phẩm", "Tin tức ra mắt"],
+    "typicalLengthWords": 1400,
+    "commonHeadings": ["Giá iPhone 17 Pro Max chính hãng", "Bảng giá theo dung lượng", "Có nên mua không?"],
+    "contentGaps": ["Giải thích chênh lệch giá giữa các đại lý", "Lịch sử giảm giá các đời Pro Max để dự đoán thời điểm mua", "Tổng chi phí trả góp thực tế"],
+    "competitors": [
+      { "url": "https://example.com/gia-iphone-17-pro-max", "title": "Giá iPhone 17 Pro Max mới nhất", "takeaway": "Có bảng giá nhưng không ghi ngày cập nhật" },
+      { "url": null, "title": "Trang sản phẩm đại lý lớn", "takeaway": "Giá rõ nhưng thiếu phần giải thích, không có FAQ" }
+    ],
+    "dataConfidence": "model_estimate"
+  },
+  "cluster": {
+    "pillar": "Hướng dẫn mua iPhone 17 Pro Max 2026: giá, phiên bản, trả góp",
+    "clusters": [
+      { "title": "Bảng giá iPhone 17 Pro Max theo dung lượng", "targetKeyword": "giá iphone 17 pro max", "intent": "commercial" },
+      { "title": "Trả góp iPhone 17 Pro Max 0%: tính tổng chi phí", "targetKeyword": "iphone 17 pro max trả góp", "intent": "transactional" },
+      { "title": "iPhone 17 Pro Max vs 16 Pro Max: có đáng nâng cấp?", "targetKeyword": "so sánh iphone 17 pro max và 16 pro max", "intent": "informational" }
+    ],
+    "internalLinks": [
+      { "from": "Bảng giá iPhone 17 Pro Max theo dung lượng", "to": "Trả góp iPhone 17 Pro Max 0%", "anchor": "tính trả góp iPhone 17 Pro Max" }
+    ]
+  },
+  "geoChecklist": [
+    { "id": "answer-first", "label": "Nêu mức giá ngay câu đầu tiên", "why": "AI Overview trích câu trả lời trực tiếp", "priority": "must" },
+    { "id": "updated", "label": "Ghi 'Cập nhật lần cuối' kèm ngày", "why": "Tín hiệu freshness cho RAG", "priority": "must" },
+    { "id": "schema", "label": "Schema Product + Offer + FAQPage", "why": "Giúp máy hiểu giá và thực thể", "priority": "should" },
+    { "id": "table", "label": "Bảng so sánh giá theo dung lượng và màu", "why": "Định dạng dễ trích dẫn", "priority": "should" },
+    { "id": "author", "label": "Tác giả có chức danh, kinh nghiệm bán hàng", "why": "E-E-A-T", "priority": "nice" }
+  ],
+  "suggestedTitle": "Giá iPhone 17 Pro Max 2026: Bảng giá mới nhất & trả góp",
+  "suggestedMetaDescription": "Cập nhật giá iPhone 17 Pro Max chính hãng VN/A theo dung lượng, so sánh đại lý và tính trả góp 0%. Cập nhật hằng ngày.",
+  "faq": [
+    { "question": "iPhone 17 Pro Max giá bao nhiêu?", "answerDraft": "Giá niêm yết bản 256GB từ khoảng 34,99 triệu đồng (ước tính, cần kiểm chứng); giá thực tế thay đổi theo đại lý và khuyến mãi." },
+    { "question": "Khi nào iPhone 17 Pro Max giảm giá?", "answerDraft": "Theo lịch sử các đời Pro Max, giá thường giảm 1–2 triệu sau 2–3 tháng ra mắt và giảm sâu hơn vào dịp cuối năm." }
+  ]
+}

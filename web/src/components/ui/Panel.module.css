@@ -1,0 +1,6 @@
+.panel { background: var(--surface-card); border: 1px solid var(--line-1); border-radius: var(--cms-panel-radius); overflow: hidden; }
+.head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--cms-panel-head-h); padding: 0 var(--cms-panel-pad-x); border-bottom: 1px solid var(--line-1); }
+.title { font: var(--cms-panel-title); color: var(--fg-1); }
+.sub { font: var(--text-caption); color: var(--text-muted); margin-left: var(--space-2); }
+.body { padding: var(--cms-panel-pad-y) var(--cms-panel-pad-x); display: flex; flex-direction: column; gap: var(--cms-panel-gap); }
+.flush .body { padding: var(--cms-panel-flush-y) 0; gap: 0; }

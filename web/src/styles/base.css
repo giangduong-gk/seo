@@ -1,0 +1,27 @@
+/* AiDoIt base — mobile-first safety net. Imported last by styles.css.
+   Only element selectors (no classes); inline styles still win, except the two !important rules noted. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; overflow-x: clip; scroll-padding-top: calc(var(--header-offset) + 16px); }
+body { margin: 0; min-width: var(--container-min); min-height: var(--vh-screen); overflow-wrap: break-word; -webkit-font-smoothing: antialiased; }
+img, video, canvas, iframe, svg { max-width: 100%; }
+img, video { height: auto; }
+h1, h2, h3, h4 { text-wrap: balance; }
+p, li, dd, blockquote, figcaption { text-wrap: pretty; }
+pre, code, kbd { white-space: pre-wrap; overflow-wrap: anywhere; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button, a, input, select, textarea, label, summary { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--volt); outline-offset: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+/* !important #1 — iOS zooms the page when a focused field is < 16px */
+@media (pointer: coarse) { input, select, textarea { font-size: 16px !important; } }
+/* !important #2 — user preference beats any component motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+/* Component keyframes (Skeleton, Progress, spinners) */
+@keyframes ds-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@keyframes ds-indeterminate { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+@keyframes ds-page-in { from { opacity: 0; transform: translateY(var(--motion-rise, 8px)); } to { opacity: 1; transform: none; } }
+@keyframes ds-sheen { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+@keyframes ds-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }

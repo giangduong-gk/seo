@@ -1,0 +1,4 @@
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 var(--chip-pad-x); border-radius: var(--radius-pill); border: 1px solid var(--line-2); background: var(--state-1); color: var(--fg-1); font: 500 13px/1 var(--font-body); white-space: nowrap; max-width: 100%; }
+.chip > span { overflow: hidden; text-overflow: ellipsis; }
+.selected { background: var(--volt-soft); border-color: rgba(255,234,0,0.28); color: var(--volt); }
+.muted { color: var(--fg-2); }

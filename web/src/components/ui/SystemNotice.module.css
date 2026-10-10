@@ -1,0 +1,11 @@
+.notice { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-m); border: 1px solid; font: var(--text-body-s); }
+.notice strong { display: block; font-weight: 600; margin-bottom: 2px; }
+.icon { flex: none; margin-top: 1px; }
+.amber { background: var(--warning-soft); border-color: var(--warning-line); color: var(--fg-1); }
+.amber .icon { color: var(--warning); }
+.red { background: var(--danger-soft); border-color: var(--danger-line); color: var(--fg-1); }
+.red .icon { color: var(--danger); }
+.blue { background: var(--info-soft); border-color: var(--info-line); color: var(--fg-1); }
+.blue .icon { color: var(--info); }
+.neutral { background: var(--bg-3); border-color: var(--line-2); color: var(--fg-2); }
+.content { flex: 1 1 auto; min-width: 0; }

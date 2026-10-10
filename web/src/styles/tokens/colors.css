@@ -1,0 +1,84 @@
+:root {
+  /* Surfaces — near-black, cool-neutral */
+  --bg-0: #030304;   /* page / marketing */
+  --bg-1: #0F1113;   /* app shell */
+  --bg-2: #16181B;   /* card */
+  --bg-3: #1E2125;   /* raised / hover */
+  --bg-4: #2A2E33;   /* input strong / pressed */
+  /* Text */
+  --fg-1: #F4F5F6;
+  --fg-2: #A9ADB3;
+  --fg-3: #6E737A;
+  --fg-4: #464A50;
+  /* Lines */
+  --line-1: rgba(255,255,255,0.06);
+  --line-2: rgba(255,255,255,0.10);
+  --line-3: rgba(255,255,255,0.16);
+  /* Accent — Lemon (the only brand color; token name kept as --volt) */
+  --volt: #FFEA00;
+  --volt-hover: #FFF35C;
+  --volt-press: #F2C400;
+  --volt-soft: rgba(255,232,58,0.12);
+  --on-volt: #0A0B0C;
+  --volt-gradient: linear-gradient(100deg, #FFFB8A 0%, #FFEA00 42%, #FFC400 100%); /* @kind color */
+  --volt-gradient-hover: linear-gradient(100deg, #FFFDB0 0%, #FFF033 42%, #FFD21F 100%); /* @kind color */
+  --volt-gradient-press: linear-gradient(100deg, #FFF35C 0%, #F2D800 42%, #F2B200 100%); /* @kind color */
+  /* Tags */
+  --tag-new: #FFEA00;
+  --tag-top: #FF4D8D;
+  /* Award gold */
+  --gold-1: #8E733A;
+  --gold-2: #EAD9A3;
+  --gold-3: #9F8754;
+  --gold-gradient: linear-gradient(100deg, #8E733A 0%, #EAD9A3 58%, #9F8754 100%); /* @kind color */
+  /* Semantic */
+  --success: #3DDC97;
+  --warning: #FFB547;
+  --danger: #FF5A4E;
+  --info: #5AB4FF;
+
+  /* Editorial (measured from blog screenshot) */
+  --blog-bg: #131416;
+  --feature-panel: #252628;
+  --btn-neutral: #4A4B4D;
+  --btn-neutral-hover: #58595B;
+  --meta-text: #6B6C70;
+  --excerpt-text: #77787C;
+  --pill-bg: #FFFFFF;
+  --pill-text: #0E0F10;
+
+  /* Semantic aliases */
+  --surface-page: var(--bg-0);
+  --surface-app: var(--bg-1);
+  --surface-card: var(--bg-2);
+  --surface-raised: var(--bg-3);
+  --surface-overlay: rgba(3,3,4,0.72);
+  --text-primary: var(--fg-1);
+  --text-secondary: var(--fg-2);
+  --text-muted: var(--fg-3);
+  --text-disabled: var(--fg-4);
+  --border-subtle: var(--line-1);
+  --border-default: var(--line-2);
+  --border-strong: var(--line-3);
+  --action-primary: var(--volt);
+  --action-primary-text: var(--on-volt);
+  --focus-ring: 0 0 0 3px rgba(255,232,58,0.28); /* @kind other */
+  /* Semantic tints — notices, menus, badges */
+  --success-soft: rgba(61,220,151,0.10);
+  --success-line: rgba(61,220,151,0.30);
+  --warning-soft: rgba(255,181,71,0.10);
+  --warning-line: rgba(255,181,71,0.30);
+  --danger-soft: rgba(255,90,78,0.10);
+  --danger-line: rgba(255,90,78,0.30);
+  --info-soft: rgba(90,180,255,0.10);
+  --info-line: rgba(90,180,255,0.30);
+  /* State layers — hover / selected / pressed (black alpha in light theme) */
+  --state-1: rgba(255,255,255,0.04);
+  --state-2: rgba(255,255,255,0.06);
+  --state-3: rgba(255,255,255,0.08);
+  --state-4: rgba(255,255,255,0.10);
+  --on-media: #FFFFFF;           /* text & icons on photos/video — never themed */
+  --media-shade: rgba(0,0,0,0.4);
+  --stripe: rgba(255,255,255,0.03);       /* placeholder diagonal stripes */
+  --media-shade-strong: rgba(0,0,0,0.7);  /* scrim behind text on media */
+}

@@ -1,0 +1,13 @@
+/* Motion — durations & easings beyond spacing.css (--dur-fast 120 · --dur-base 180 · --dur-media 400 · --ease-out) */
+:root {
+  --dur-instant: 80ms; /* @kind other */            /* press, toggle knob */
+  --dur-slow: 320ms; /* @kind other */              /* reveal, sheet */
+  --dur-page: 360ms; /* @kind other */              /* route enter */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* @kind other */           /* exits only */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* @kind other */    /* swaps, carousels, pulses */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1); /* @kind other */    /* entrances: pages, dialogs, sheets */
+  --motion-rise: 8px;             /* entrance offset */
+  --motion-stagger: 40ms; /* @kind other */         /* list stagger, max 6 items */
+  --press-scale: 0.98; /* @kind other */
+  --hover-preview-delay: 150ms; /* @kind other */   /* video preview starts after intent */
+}
