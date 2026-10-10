@@ -4,13 +4,14 @@ import { SubNav } from "@/components/shell/SubNav";
 import { MODELS } from "@/lib/claude";
 import { prisma } from "@/lib/db";
 
-export async function ProjectHeader({ projectId, active, trail }: { projectId: string; active: "analyses" | "clusters" | "briefs"; trail?: string }) {
+export async function ProjectHeader({ projectId, active, trail }: { projectId: string; active: "analyses" | "clusters" | "briefs" | "articles"; trail?: string }) {
   const [project, counts, usage] = await Promise.all([
     prisma.project.findUniqueOrThrow({ where: { id: projectId } }),
     Promise.all([
       prisma.analysis.count({ where: { projectId } }),
       prisma.cluster.count({ where: { projectId } }),
       prisma.brief.count({ where: { projectId } }),
+      prisma.article.count({ where: { projectId } }),
     ]),
     prisma.aiUsage.aggregate({ where: { projectId }, _sum: { costUsd: true } }),
   ]);
@@ -32,6 +33,7 @@ export async function ProjectHeader({ projectId, active, trail }: { projectId: s
         { href: base, label: "Phân tích từ khoá", count: counts[0], active: active === "analyses" },
         { href: `${base}/clusters`, label: "Topic Cluster", count: counts[1], active: active === "clusters" },
         { href: `${base}/briefs`, label: "Content Brief", count: counts[2], active: active === "briefs" },
+        { href: `${base}/articles`, label: "Bài viết", count: counts[3], active: active === "articles" },
       ]} />
     </>
   );

@@ -27,3 +27,11 @@ src/components/cluster/*    editor Topic Cluster (React Flow, kéo thả, lưu v
 src/app/                    / · /projects/[id] · …/analyses/[id] · …/clusters/[id] · …/briefs/[id] · /usage
 src/app/api/briefs/[id]/markdown  xuất brief .md
 ```
+
+## Bài viết (Sprint 3)
+```
+src/app/projects/[id]/articles/            danh sách bài + form "Viết bài" (từ brief hoặc từ khoá); …/[articleId] trình soạn thảo
+src/components/article/ArticleEditor.tsx   editor Markdown 3 chế độ (soạn/xem trước/song song), lưu, trạng thái, export md/html/jsonld
+src/components/article/useWriterStream.ts  đọc SSE từ POST /api/articles/[id]/write (write · fix · rewrite), huỷ bằng AbortController
+src/components/article/ScorePanel.tsx      điểm SEO/GEO theo tiêu chí, nút "Sửa" gửi criterion.fix cho Writer; Brief · JSON-LD · Phiên bản ở aside
+```

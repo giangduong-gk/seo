@@ -2,10 +2,12 @@ import { Download } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Chip, Panel, SystemNotice } from "@/components/ui";
+import { hasApiKey } from "@/lib/claude";
 import { prisma } from "@/lib/db";
 import { ContentBrief } from "@/lib/schemas";
 import { IntentBadge } from "../../IntentBadge";
 import { ProjectHeader } from "../../ProjectHeader";
+import { ArticleForm } from "../../articles/ArticleForm";
 import { CopyButton } from "./CopyButton";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +39,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         <div className="actions">
+          <ArticleForm projectId={id} briefs={[]} defaultBriefId={b.id} disabled={!hasApiKey()} compact />
           <CopyButton url={mdUrl} />
           <a href={`${mdUrl}?download=1`} className="body-s" style={{ display: "inline-flex", alignItems: "center", gap: 6, height: "var(--control-h-m)", padding: "0 var(--control-pad-m)", borderRadius: "var(--radius-button)", background: "var(--volt-gradient)", color: "var(--on-volt)", fontWeight: 600 }}><Download size={16} aria-hidden /> Tải Markdown</a>
         </div>
