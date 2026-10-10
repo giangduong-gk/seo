@@ -39,7 +39,7 @@ jobs:
       - run: npm run build
       - name: Design-token lint (hard-coded colors)
         run: npm run lint:tokens
-        continue-on-error: true # báo cáo, chưa chặn merge — xem web/TESTING.md
+        # lint token bắt buộc (đã sạch từ Sprint 3)
 
   e2e:
     name: E2E smoke (Playwright, Chromium)

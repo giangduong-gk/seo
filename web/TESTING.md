@@ -37,15 +37,17 @@ Module Sprint 3 (`scorer.ts`, `jsonld.ts`) được import qua `tests/unit/_help
 ## 3. E2E smoke (Playwright Test)
 
 Cấu hình: `playwright.config.ts`
-- `webServer`: `npm run dev -- -p 3500`, `reuseExistingServer: true`, timeout 180 s, env `DATABASE_URL=file:./test.db`, `ANTHROPIC_API_KEY=""`.
-- `globalSetup` (`tests/e2e/global-setup.ts`): xoá `prisma/test.db*`, `prisma db push --skip-generate`, `node prisma/seed.mjs` — cùng env.
+- `webServer`: `npm run dev -- -p 3500`, `reuseExistingServer: true`, timeout 180 s, env `DATABASE_URL=file:<abs>/web/prisma/test.db` (hằng `E2E_DATABASE_URL` trong config), `ANTHROPIC_API_KEY=""`.
+- `globalSetup` (`tests/e2e/global-setup.ts`): `prisma db push --skip-generate` (tạo file nếu chưa có) → `tests/e2e/reset-db.mjs` (xoá dữ liệu, **giữ nguyên file**) → `node prisma/seed.mjs` — cùng env.
+  Không xoá file DB vì Playwright khởi động `webServer` *trước* `globalSetup`: server đã mở file, xoá/tạo lại sẽ gây `SQLITE_READONLY_DBMOVED` ("attempt to write a readonly database").
 - 2 project: `chromium` (Desktop Chrome) và `phone` (390×844, isMobile, touch, UA iPhone 13 — chạy bằng Chromium, không tải WebKit).
 - Chromium: dùng `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` nếu tồn tại (hoặc `PW_CHROME_PATH`), ngược lại dùng browser Playwright cài (CI).
 - Fixture `tests/e2e/fixtures.ts` tự động cho mọi test: gom `pageerror` + `console.error` (bỏ qua favicon/React DevTools), sau mỗi test kiểm tra không lỗi và `document.documentElement.scrollWidth <= innerWidth`.
 
 **Ghi chú env đã kiểm chứng**
 - `@next/env` chụp `process.env` lúc khởi động và **không cho `.env` ghi đè khoá đã có** — kể cả giá trị rỗng. Vì vậy `ANTHROPIC_API_KEY=""` truyền qua `webServer.env` thắng khoá thật trong `web/.env` → UI hiện thông báo vàng, nút sinh nội dung bị vô hiệu, không có cuộc gọi Claude nào.
-- Prisma CLI/Client cũng ưu tiên `process.env` → `DATABASE_URL=file:./test.db` tạo `web/prisma/test.db` (đường dẫn tương đối tính theo thư mục schema), `dev.db` không bị động tới.
+- Prisma CLI/Client cũng ưu tiên `process.env`; `dev.db` không bị động tới.
+- **Dùng đường dẫn tuyệt đối cho DB e2e.** Client Prisma resolve `file:./x.db` theo thư mục schema được "nướng" vào `node_modules/.prisma` lúc `prisma generate`. Trong sprint này đã gặp sự cố: một bản copy của dự án (`…/scratchpad/webbuild`, `node_modules` là symlink về `web/node_modules`) chạy `prisma generate` → mọi `file:./…` trong `web` trỏ sang `webbuild/prisma/…` ("table Project does not exist"). Khắc phục: `cd web && npx prisma generate`; e2e không còn bị ảnh hưởng vì dùng đường dẫn tuyệt đối, nhưng `dev.db` của server dev (`file:./dev.db`) vẫn có thể bị lệch — không `prisma generate` từ bản copy dùng chung `node_modules`.
 - Nếu đã có server khác ở cổng 3500 (`reuseExistingServer`), test sẽ dùng DB của server đó — hãy tắt nó hoặc đặt `E2E_PORT`.
 
 | Spec | Kiểm tra |
@@ -62,16 +64,14 @@ Cấu hình: `playwright.config.ts`
 
 `tools/lint-tokens.mjs` quét `src/**/*.{tsx,css}` (trừ `src/styles/tokens/**`, `src/styles/base.css`) tìm `#hex`, `rgb(`, `rgba(`, `hsl(`, `hsla(` nằm ngoài `var(--…)`. Cho phép bằng chú thích `/* lint-allow-color */` trên cùng dòng. `--json` để xuất máy đọc.
 
-### Kết quả hiện tại (2026-10-10) — 6 vi phạm, không thuộc QA, cần team UI xử lý
+### Kết quả hiện tại (2026-10-10)
 
-| Vị trí | Màu | Gợi ý |
-| --- | --- | --- |
-| `src/components/cluster/ClusterEditor.module.css:17` | `rgba(255,234,0,0.35)` | dùng token volt soft/border (vd `var(--volt-soft)`/`--line-volt`) |
-| `src/components/cluster/ClusterEditor.tsx:160` | `rgba(255,255,255,0.06)` (React Flow `<Background color>`) | đọc token qua CSS var hoặc đánh dấu `lint-allow-color` |
-| `src/components/cluster/ClusterEditor.tsx:162` | `#FFEA00`, `#6E737A`, `rgba(...)` (MiniMap nodeColor/maskColor) | như trên — React Flow nhận chuỗi màu, có thể lấy `getComputedStyle(document.documentElement).getPropertyValue("--volt")` |
-| `src/components/ui/Badge.module.css:3` | `#fff` | `var(--fg-on-accent)` hoặc token tương đương |
-| `src/components/ui/Chip.module.css:3` | `rgba(255,234,0,0.28)` | token volt border |
-| `src/components/ui/Progress.module.css:3` | `rgba(255,255,255,0.10)` | `var(--bg-3)`/`--line-1` |
+Lần quét đầu tiên phát hiện 6 dòng màu hard-code (không thuộc QA):
+`ClusterEditor.module.css:17` (rgba volt), `ClusterEditor.tsx:160` (React Flow `<Background color>`), `ClusterEditor.tsx:162` (MiniMap `#FFEA00`/`#6E737A`/rgba),
+`Badge.module.css:3` (`#fff`), `Chip.module.css:3` (rgba volt), `Progress.module.css:3` (rgba trắng).
+Team UI đã xử lý ngay trong sprint (commit "Token lint clean"): Badge/Progress chuyển sang token (`var(--on-media)`, token state),
+4 vị trí còn lại là màu truyền vào React Flow/viền volt mờ và được đánh dấu `/* lint-allow-color */` kèm lý do. **`npm run lint:tokens` hiện exit 0.**
+Khi lint đã sạch ổn định, bỏ `continue-on-error` trong CI để lint chặn merge.
 
 ## 5. Checklist QA thủ công
 
