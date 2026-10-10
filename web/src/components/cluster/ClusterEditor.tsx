@@ -157,9 +157,9 @@ export function ClusterEditor({ projectId, clusterId, initial, model, canGenerat
             </div>
             <div className={s.flow}>
               <ReactFlow<TopicNodeType, Edge> nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={(c) => { onNodesChange(c); if (c.some((x) => x.type === "position" && x.dragging === false)) markDirty(); }} onEdgesChange={onEdgesChange} onConnect={onConnect} onNodeClick={onNodeClick} onPaneClick={() => setSelectedId(null)} fitView fitViewOptions={{ padding: 0.15, maxZoom: 1 }} colorMode="dark" minZoom={0.2} proOptions={{ hideAttribution: true }}>
-                <Background gap={24} size={1} color="rgba(255,255,255,0.06)" />
+                <Background gap={24} size={1} color="rgba(255,255,255,0.06)" /> {/* lint-allow-color: React Flow nhận chuỗi màu */}
                 <Controls showInteractive={false} />
-                <MiniMap pannable zoomable style={{ width: 140, height: 100 }} nodeColor={(n) => ((n as TopicNodeType).data?.node?.kind === "pillar" ? "#FFEA00" : "#6E737A")} maskColor="rgba(3,3,4,0.6)" />
+                <MiniMap pannable zoomable style={{ width: 140, height: 100 }} /* lint-allow-color */ nodeColor={(n) => ((n as TopicNodeType).data?.node?.kind === "pillar" ? "#FFEA00" : "#6E737A")} maskColor="rgba(3,3,4,0.6)" />
               </ReactFlow>
             </div>
           </div>

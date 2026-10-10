@@ -14,7 +14,7 @@
 .node { min-width: 180px; max-width: 240px; padding: 10px 12px; border-radius: var(--radius-m); background: var(--bg-2); border: 1px solid var(--line-2); color: var(--fg-1); box-shadow: var(--shadow-raised); transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); }
 .node:hover { border-color: var(--line-3); }
 .nodeSelected { border-color: var(--volt) !important; box-shadow: var(--focus-ring), var(--shadow-raised); }
-.pillar { background: var(--bg-3); border-color: rgba(255,234,0,0.35); min-width: 220px; }
+.pillar { background: var(--bg-3); border-color: rgba(255,234,0,0.35); min-width: 220px; } /* lint-allow-color: viền accent-soft, DS chưa có token */
 .supporting { background: var(--bg-1); border-style: dashed; min-width: 160px; }
 .kind { font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--fg-3); display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .pillar .kind { color: var(--volt); }
