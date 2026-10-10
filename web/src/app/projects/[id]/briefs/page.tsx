@@ -30,7 +30,7 @@ export default async function BriefsPage({ params }: { params: Promise<{ id: str
           ) : (
             <ul>
               {project.briefs.map((b) => {
-                const d = JSON.parse(b.data) as { intent?: string; wordCount?: { min: number; max: number } };
+                const d = JSON.parse(b.data) as { intent?: string; wordCountMin?: number; wordCountMax?: number };
                 return (
                   <li key={b.id} style={{ borderBottom: "1px solid var(--line-1)" }}>
                     <Link href={`/projects/${id}/briefs/${b.id}`} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px var(--cms-panel-pad-x)", minHeight: "var(--cms-row-h)" }}>
@@ -38,7 +38,7 @@ export default async function BriefsPage({ params }: { params: Promise<{ id: str
                         <span style={{ display: "block", fontWeight: 600 }}>{b.title}</span>
                         <span className="caption mono">{b.targetKeyword}{b.cluster ? ` · ${b.cluster.title}` : ""} · {b.createdAt.toLocaleDateString("vi-VN")}</span>
                       </span>
-                      {d.wordCount && <Badge tone="outline">{d.wordCount.min}–{d.wordCount.max} từ</Badge>}
+                      {d.wordCountMin != null && <Badge tone="outline">{d.wordCountMin}–{d.wordCountMax} từ</Badge>}
                       <IntentBadge intent={d.intent} />
                     </Link>
                   </li>

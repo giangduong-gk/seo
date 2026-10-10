@@ -83,6 +83,7 @@ export async function runAnalysis(_prev: ActionState, form: FormData): Promise<A
   } catch (e: unknown) {
     const refused = e instanceof RefusalError;
     const message = e instanceof Error ? e.message : "Lỗi không xác định";
+    console.error("[runAnalysis]", e instanceof Error ? `${e.name}: ${e.message}` : e);
     await prisma.analysis.create({
       data: { projectId, keywordId: keyword.id, status: refused ? "refused" : "failed", model: process.env.CLAUDE_MODEL_ANALYSIS || "claude-opus-5-5", error: message },
     });
@@ -105,6 +106,7 @@ function parseAnalysis(json: string | null): KeywordAnalysis | null {
 }
 
 function friendlyError(e: unknown): string {
+  console.error("[action]", e instanceof Error ? `${e.name}: ${e.message}` : e);
   if (e instanceof RefusalError) return `Model từ chối yêu cầu này (${e.category ?? "không rõ lý do"}). Thử diễn đạt lại.`;
   return e instanceof Error ? e.message : "Lỗi không xác định";
 }

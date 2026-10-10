@@ -22,7 +22,7 @@ function systemBlocks(project: ProjectProfile): Anthropic.TextBlockParam[] {
 export async function researchSerp(project: ProjectProfile, keyword: string, projectId?: string) {
   if (!WEB_SEARCH_ON) return null;
   const model = MODELS.analysis;
-  const res = await claude().messages.create({
+  const res = await claude().messages.stream({
     model,
     max_tokens: 8000,
     thinking: { type: "adaptive" },
@@ -33,14 +33,14 @@ export async function researchSerp(project: ProjectProfile, keyword: string, pro
         type: "web_search_20260209",
         name: "web_search",
         max_uses: WEB_SEARCH_MAX_USES,
-        user_location: { type: "approximate", country: project.locale.endsWith("VN") ? "VN" : undefined },
+        // Không truyền user_location: API từ chối một số mã quốc gia (VN). Thị trường được nêu trong prompt.
       },
     ],
     messages: [
       {
         role: "user",
         content:
-          `Nghiên cứu SERP cho từ khoá: "${keyword}" (thị trường ${project.locale}).\n` +
+          `Nghiên cứu SERP cho từ khoá: "${keyword}" (thị trường ${project.locale}; tìm bằng ngôn ngữ của thị trường và ưu tiên website phục vụ thị trường đó).\n` +
           "Tìm top kết quả hiện tại và tóm tắt bằng văn bản có cấu trúc:\n" +
           "1) Danh sách 5–8 kết quả nổi bật: URL, tiêu đề, định dạng, điểm mạnh, điểm thiếu.\n" +
           "2) Các heading/câu hỏi lặp lại nhiều.\n" +
@@ -50,7 +50,7 @@ export async function researchSerp(project: ProjectProfile, keyword: string, pro
           "Chỉ ghi điều có trong kết quả tìm được; không bịa URL.",
       },
     ],
-  });
+  }).finalMessage();
   assertNotRefused(res);
   await recordUsage({ projectId, feature: "serp_research", model, usage: res.usage });
   return textOf(res);
@@ -64,7 +64,7 @@ export async function analyzeKeyword(
   projectId?: string,
 ) {
   const model = MODELS.analysis;
-  const res = await claude().messages.parse({
+  const res = await claude().messages.stream({
     model,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
@@ -88,7 +88,7 @@ export async function analyzeKeyword(
           `- Viết bằng ngôn ngữ ${project.locale}.`,
       },
     ],
-  });
+  }).finalMessage();
   assertNotRefused(res);
   await recordUsage({ projectId, feature: "keyword_analysis", model, usage: res.usage });
   if (!res.parsed_output) throw new Error("Không parse được kết quả phân tích từ model.");

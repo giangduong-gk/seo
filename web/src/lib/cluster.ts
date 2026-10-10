@@ -28,7 +28,7 @@ export async function generateClusterMap(project: ProjectProfile, keywords: Keyw
     })
     .join("\n");
 
-  const res = await claude().messages.parse({
+  const res = await claude().messages.stream({
     model,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
@@ -50,7 +50,7 @@ export async function generateClusterMap(project: ProjectProfile, keywords: Keyw
           `- Viết bằng ngôn ngữ ${project.locale}.`,
       },
     ],
-  });
+  }).finalMessage();
   assertNotRefused(res);
   await recordUsage({ projectId, feature: "cluster_map", model, usage: res.usage });
   if (!res.parsed_output) throw new Error("Không parse được bản đồ cluster từ model.");

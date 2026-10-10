@@ -1,7 +1,7 @@
 import { Download } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Badge, Chip, Panel, SystemNotice, Table } from "@/components/ui";
+import { Badge, Chip, Panel, SystemNotice } from "@/components/ui";
 import { prisma } from "@/lib/db";
 import { ContentBrief } from "@/lib/schemas";
 import { IntentBadge } from "../../IntentBadge";
@@ -32,7 +32,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
           <div className="row" style={{ marginTop: 10 }}>
             <IntentBadge intent={r.intent} />
             <Badge tone="outline">{r.format}</Badge>
-            <Badge tone="outline">{r.wordCount.min}–{r.wordCount.max} từ</Badge>
+            <Badge tone="outline">{r.wordCountMin}–{r.wordCountMax} từ</Badge>
             <span className="caption mono">/{r.slug}</span>
           </div>
         </div>
@@ -61,10 +61,10 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
               <div className="row" style={{ gap: 8 }}>
                 <span className="micro" style={{ color: o.level === 1 ? "var(--volt)" : undefined }}>H{o.level}</span>
                 <span style={{ fontWeight: o.level === 1 ? 700 : 600, fontSize: o.level === 1 ? 18 : 15 }}>{o.heading}</span>
-                {o.wordCount && <span className="caption mono">~{o.wordCount} từ</span>}
+                {o.wordCount > 0 && <span className="caption mono">~{o.wordCount} từ</span>}
               </div>
-              {o.answerFirst && <p className="body-s" style={{ marginTop: 4, padding: "8px 12px", background: "var(--volt-soft)", borderRadius: "var(--radius-s)", color: "var(--fg-1)" }}><span className="micro volt">answer-first</span><br />{o.answerFirst}</p>}
-              {o.notes && <p className="caption" style={{ marginTop: 6 }}>{o.notes}</p>}
+              {o.answerFirst !== "" && <p className="body-s" style={{ marginTop: 4, padding: "8px 12px", background: "var(--volt-soft)", borderRadius: "var(--radius-s)", color: "var(--fg-1)" }}><span className="micro volt">answer-first</span><br />{o.answerFirst}</p>}
+              {o.notes !== "" && <p className="caption" style={{ marginTop: 6 }}>{o.notes}</p>}
               {o.keywords.length > 0 && <div className="row" style={{ marginTop: 6, gap: 6 }}>{o.keywords.map((k) => <Chip key={k} muted>{k}</Chip>)}</div>}
             </li>
           ))}
@@ -73,10 +73,10 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
 
       <div style={{ display: "grid", gap: "var(--cms-grid-gap)", gridTemplateColumns: "repeat(auto-fit, minmax(min(420px, 100%), 1fr))", alignItems: "start" }}>
         <Panel title="E-E-A-T">
-          <div><div className="micro">Tác giả</div><p className="body-s" style={{ marginTop: 4 }}>{r.eeat.author}</p></div>
-          <div><div className="micro">Tín hiệu kinh nghiệm</div><ul className="body-s secondary" style={{ display: "grid", gap: 4, marginTop: 4 }}>{r.eeat.experienceSignals.map((x) => <li key={x}>· {x}</li>)}</ul></div>
-          <div><div className="micro">Bằng chứng cần có</div><ul className="body-s secondary" style={{ display: "grid", gap: 4, marginTop: 4 }}>{r.eeat.evidenceNeeded.map((x) => <li key={x}>· {x}</li>)}</ul></div>
-          {r.eeat.sourcesToCite.length > 0 && <div><div className="micro">Nguồn nên dẫn</div><ul className="body-s" style={{ display: "grid", gap: 6, marginTop: 4 }}>{r.eeat.sourcesToCite.map((s, i) => <li key={i}><b style={{ fontWeight: 500 }}>{s.url ? <a href={s.url} target="_blank" rel="noreferrer noopener" style={{ textDecoration: "underline" }}>{s.name}</a> : s.name}</b> <span className="secondary">— {s.why}</span></li>)}</ul></div>}
+          <div><div className="micro">Tác giả</div><p className="body-s" style={{ marginTop: 4 }}>{r.eeatAuthor}</p></div>
+          <div><div className="micro">Tín hiệu kinh nghiệm</div><ul className="body-s secondary" style={{ display: "grid", gap: 4, marginTop: 4 }}>{r.eeatExperienceSignals.map((x) => <li key={x}>· {x}</li>)}</ul></div>
+          <div><div className="micro">Bằng chứng cần có</div><ul className="body-s secondary" style={{ display: "grid", gap: 4, marginTop: 4 }}>{r.eeatEvidenceNeeded.map((x) => <li key={x}>· {x}</li>)}</ul></div>
+          {r.eeatSources.length > 0 && <div><div className="micro">Nguồn nên dẫn</div><ul className="body-s" style={{ display: "grid", gap: 6, marginTop: 4 }}>{r.eeatSources.map((x, i) => <li key={i}>· {x}</li>)}</ul></div>}
         </Panel>
         <Panel title="Checklist GEO" sub={`${r.geoChecklist.length}`}>
           <ul style={{ display: "grid", gap: 10 }}>
@@ -86,21 +86,18 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <div style={{ display: "grid", gap: "var(--cms-grid-gap)", gridTemplateColumns: "repeat(auto-fit, minmax(min(420px, 100%), 1fr))", alignItems: "start" }}>
-        <Panel title="Schema JSON-LD" flush>
-          <Table columns={["Type", "Trường", "Lý do"]} rows={r.schemaPlan.map((s) => [s.type, <span key="f" className="mono">{s.fields.join(", ")}</span>, s.why])} minWidth={480} />
+        <Panel title="Schema JSON-LD">
+          <ul className="body-s" style={{ display: "grid", gap: 8 }}>{r.schemaPlan.map((x, i) => { const [type, rest] = x.split(/:(.+)/); return <li key={i}><Badge tone="outline">{type.trim()}</Badge> <span style={{ marginLeft: 6 }}>{(rest ?? "").trim()}</span></li>; })}</ul>
         </Panel>
         <Panel title="Multi-format">
-          <ul style={{ display: "grid", gap: 10 }}>
-            {r.multiFormat.map((m, i) => <li key={i} className="body-s"><Badge tone="outline">{m.type}</Badge> <span style={{ marginLeft: 6 }}>{m.description}</span>{m.altText && <div className="caption">alt: {m.altText}</div>}</li>)}
-          </ul>
+          <ul className="body-s" style={{ display: "grid", gap: 8 }}>{r.multiFormat.map((x, i) => { const [type, rest] = x.split(/:(.+)/); return <li key={i}><Badge tone="outline">{type.trim()}</Badge> <span style={{ marginLeft: 6 }}>{(rest ?? "").trim()}</span></li>; })}</ul>
         </Panel>
       </div>
 
       <div style={{ display: "grid", gap: "var(--cms-grid-gap)", gridTemplateColumns: "repeat(auto-fit, minmax(min(420px, 100%), 1fr))", alignItems: "start" }}>
-        <Panel title="Liên kết">
-          {r.internalLinks.length > 0 && <div><div className="micro">Internal</div><ul className="body-s secondary" style={{ display: "grid", gap: 4, marginTop: 4 }}>{r.internalLinks.map((l, i) => <li key={i}>→ <b style={{ color: "var(--fg-1)", fontWeight: 500 }}>{l.to}</b> · anchor “{l.anchor}”</li>)}</ul></div>}
-          {r.externalLinks.length > 0 && <div><div className="micro">External</div><ul className="body-s secondary" style={{ display: "grid", gap: 4, marginTop: 4 }}>{r.externalLinks.map((l, i) => <li key={i}>→ <b style={{ color: "var(--fg-1)", fontWeight: 500 }}>{l.to}</b> · “{l.anchor}” — {l.why}</li>)}</ul></div>}
-          {r.internalLinks.length + r.externalLinks.length === 0 && <p className="caption">Không có đề xuất liên kết.</p>}
+        <Panel title="Liên kết" sub={`${r.links.length}`}>
+          {(["internal", "external"] as const).map((t) => { const ls = r.links.filter((l) => l.type === t); return ls.length ? <div key={t}><div className="micro">{t}</div><ul className="body-s secondary" style={{ display: "grid", gap: 4, marginTop: 4 }}>{ls.map((l, i) => <li key={i}>→ <b style={{ color: "var(--fg-1)", fontWeight: 500 }}>{l.to}</b> · anchor “{l.anchor}”{l.why ? ` — ${l.why}` : ""}</li>)}</ul></div> : null; })}
+          {r.links.length === 0 && <p className="caption">Không có đề xuất liên kết.</p>}
         </Panel>
         <Panel title="Không được" sub="cho writer">
           <ul className="body-s" style={{ display: "grid", gap: 6 }}>{r.doNot.map((d) => <li key={d} style={{ display: "flex", gap: 8 }}><span style={{ color: "var(--danger)" }}>✕</span>{d}</li>)}</ul>

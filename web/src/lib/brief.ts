@@ -54,21 +54,21 @@ export async function generateBrief(project: ProjectProfile, input: BriefInput, 
   parts.push(
     "## Yêu cầu\n" +
       "- Outline: H1 rồi 6–10 H2 (có H3 khi cần); mỗi H2/H3 có answerFirst là câu trả lời trực tiếp; notes ghi dữ liệu cần dẫn và định dạng (bảng/bước/ảnh).\n" +
-      "- E-E-A-T: tác giả cần gì, bằng chứng kinh nghiệm, số liệu cần có, nguồn uy tín nên dẫn (chỉ URL chắc chắn tồn tại, không thì để null).\n" +
-      "- GEO checklist 6–10 mục; schemaPlan đầy đủ cho định dạng; multiFormat 3–6 gợi ý có altText.\n" +
-      "- internalLinks tới các bài trong cluster (nếu có), externalLinks có lý do.\n" +
+      "- E-E-A-T: eeatAuthor, eeatExperienceSignals, eeatEvidenceNeeded, eeatSources (chỉ ghi URL khi chắc chắn tồn tại).\n" +
+      "- GEO checklist 6–10 mục; schemaPlan đủ cho định dạng (Article, FAQPage, HowTo, Product...); multiFormat 3–6 gợi ý kèm alt text.\n" +
+      "- links: type internal tới các bài trong cluster (nếu có), type external kèm lý do.\n" +
       "- 4–6 FAQ answer-first; doNot 3–6 điều; updateCadence.\n" +
       `- Ngôn ngữ ${project.locale}; title ≤ 60 ký tự, metaDescription ≤ 155 ký tự.`,
   );
 
-  const res = await claude().messages.parse({
+  const res = await claude().messages.stream({
     model,
     max_tokens: 20000,
     thinking: { type: "adaptive" },
-    output_config: { effort: "high", format: zodOutputFormat(ContentBrief) },
+    output_config: { effort: "medium", format: zodOutputFormat(ContentBrief) }, // medium: brief dài, high mất >5 phút
     system: systemBlocks(project),
     messages: [{ role: "user", content: parts.join("\n\n") }],
-  });
+  }).finalMessage();
   assertNotRefused(res);
   await recordUsage({ projectId, feature: "content_brief", model, usage: res.usage });
   if (!res.parsed_output) throw new Error("Không parse được brief từ model.");
@@ -80,19 +80,17 @@ export function briefToMarkdown(b: ContentBrief, meta?: { project?: string; crea
   const L: string[] = [];
   L.push(`# Content Brief: ${b.title}`);
   if (meta?.project) L.push(`> Dự án: ${meta.project}${meta.createdAt ? ` · ${meta.createdAt.toISOString().slice(0, 10)}` : ""}`);
-  L.push("");
-  L.push("## Thông tin chung");
+  L.push("", "## Thông tin chung");
   L.push(`- **Từ khoá mục tiêu:** ${b.targetKeyword}`);
   L.push(`- **Ý định:** ${b.intent}`);
   L.push(`- **Slug:** /${b.slug}`);
   L.push(`- **Meta description:** ${b.metaDescription}`);
   L.push(`- **Đối tượng:** ${b.audience}`);
   L.push(`- **Góc viết:** ${b.angle}`);
-  L.push(`- **Định dạng:** ${b.format} · ${b.wordCount.min}–${b.wordCount.max} từ`);
+  L.push(`- **Định dạng:** ${b.format} · ${b.wordCountMin}–${b.wordCountMax} từ`);
   L.push(`- **Giọng văn:** ${b.tone}`);
   L.push(`- **Cập nhật:** ${b.updateCadence}`);
-  L.push("");
-  L.push("## Outline");
+  L.push("", "## Outline");
   for (const o of b.outline) {
     L.push(`${"#".repeat(o.level + 1)} ${o.heading}${o.wordCount ? ` _(~${o.wordCount} từ)_` : ""}`);
     if (o.answerFirst) L.push(`> **Answer-first:** ${o.answerFirst}`);
@@ -101,35 +99,21 @@ export function briefToMarkdown(b: ContentBrief, meta?: { project?: string; crea
     L.push("");
   }
   L.push("## E-E-A-T");
-  L.push(`- **Tác giả:** ${b.eeat.author}`);
-  L.push(`- **Tín hiệu kinh nghiệm:** ${b.eeat.experienceSignals.join("; ")}`);
-  L.push(`- **Bằng chứng cần có:** ${b.eeat.evidenceNeeded.join("; ")}`);
-  if (b.eeat.sourcesToCite.length) {
-    L.push("- **Nguồn nên dẫn:**");
-    for (const s of b.eeat.sourcesToCite) L.push(`  - ${s.name}${s.url ? ` (${s.url})` : ""} — ${s.why}`);
-  }
-  L.push("");
-  L.push("## Checklist GEO");
+  L.push(`- **Tác giả:** ${b.eeatAuthor}`);
+  L.push(`- **Tín hiệu kinh nghiệm:** ${b.eeatExperienceSignals.join("; ")}`);
+  L.push(`- **Bằng chứng cần có:** ${b.eeatEvidenceNeeded.join("; ")}`);
+  if (b.eeatSources.length) { L.push("- **Nguồn nên dẫn:**"); for (const x of b.eeatSources) L.push(`  - ${x}`); }
+  L.push("", "## Checklist GEO");
   for (const c of b.geoChecklist) L.push(`- [ ] **[${c.priority}]** ${c.label} — ${c.why}`);
-  L.push("");
-  L.push("## Schema (JSON-LD)");
-  for (const s of b.schemaPlan) L.push(`- **${s.type}**: ${s.fields.join(", ")} — ${s.why}`);
-  L.push("");
-  L.push("## Multi-format");
-  for (const m of b.multiFormat) L.push(`- **${m.type}**: ${m.description}${m.altText ? ` _(alt: ${m.altText})_` : ""}`);
-  L.push("");
-  if (b.internalLinks.length) {
-    L.push("## Internal links");
-    for (const l of b.internalLinks) L.push(`- → ${l.to} · anchor: "${l.anchor}"`);
-    L.push("");
-  }
-  if (b.externalLinks.length) {
-    L.push("## External links");
-    for (const l of b.externalLinks) L.push(`- → ${l.to} · anchor: "${l.anchor}" — ${l.why}`);
-    L.push("");
-  }
-  L.push("## FAQ");
-  for (const f of b.faq) { L.push(`**${f.question}**`); L.push(f.answerDraft); L.push(""); }
+  L.push("", "## Schema (JSON-LD)");
+  for (const x of b.schemaPlan) L.push(`- ${x}`);
+  L.push("", "## Multi-format");
+  for (const x of b.multiFormat) L.push(`- ${x}`);
+  const internal = b.links.filter((l) => l.type === "internal"), external = b.links.filter((l) => l.type === "external");
+  if (internal.length) { L.push("", "## Internal links"); for (const l of internal) L.push(`- → ${l.to} · anchor: "${l.anchor}"${l.why ? ` — ${l.why}` : ""}`); }
+  if (external.length) { L.push("", "## External links"); for (const l of external) L.push(`- → ${l.to} · anchor: "${l.anchor}"${l.why ? ` — ${l.why}` : ""}`); }
+  L.push("", "## FAQ");
+  for (const f of b.faq) { L.push(`**${f.question}**`, f.answerDraft, ""); }
   L.push("## Không được");
   for (const d of b.doNot) L.push(`- ${d}`);
   return L.join("\n");

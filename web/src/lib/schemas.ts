@@ -114,29 +114,23 @@ export type ClusterMap = z.infer<typeof ClusterMap>;
 /** Dữ liệu lưu DB: map + vị trí node người dùng đã kéo. */
 export type StoredClusterMap = ClusterMap & { positions?: Record<string, { x: number; y: number }> };
 
-/* ───────────── Sprint 2: Content Brief ───────────── */
+/* ───────────── Sprint 2: Content Brief ─────────────
+   Lưu ý: structured output có giới hạn kích thước grammar — giữ schema phẳng, tránh nullable/union lồng nhau. */
 
 export const OutlineItem = z.object({
-  level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  level: z.number().int().min(1).max(3).describe("1 = H1, 2 = H2, 3 = H3"),
   heading: z.string(),
-  answerFirst: z.string().nullable().describe("Câu trả lời trực tiếp 1–2 câu mở đầu mục (H2/H3)"),
-  notes: z.string().nullable().describe("Điểm cần nói, dữ liệu cần dẫn, định dạng (bảng, bước, ảnh)"),
+  answerFirst: z.string().describe("Câu trả lời trực tiếp 1–2 câu mở đầu mục; chuỗi rỗng với H1"),
+  notes: z.string().describe("Điểm cần nói, dữ liệu cần dẫn, định dạng (bảng, bước, ảnh); chuỗi rỗng nếu không có"),
   keywords: z.array(z.string()),
-  wordCount: z.number().int().nullable(),
+  wordCount: z.number().int().describe("Số từ ước tính cho mục, 0 nếu không áp dụng"),
 });
 
-export const SourceToCite = z.object({ name: z.string(), url: z.string().nullable(), why: z.string() });
-
-export const SchemaPlanItem = z.object({
-  type: z.string().describe("schema.org type: Article, FAQPage, HowTo, Product, Organization, Person, BreadcrumbList"),
-  fields: z.array(z.string()),
-  why: z.string(),
-});
-
-export const MultiFormatItem = z.object({
-  type: z.enum(["image", "infographic", "table", "video", "pdf", "calculator", "checklist", "other"]),
-  description: z.string(),
-  altText: z.string().nullable(),
+export const BriefLink = z.object({
+  type: z.enum(["internal", "external"]),
+  to: z.string().describe("Tiêu đề bài trong cluster (internal) hoặc tên nguồn/URL (external)"),
+  anchor: z.string(),
+  why: z.string().describe("Lý do đặt link; chuỗi rỗng nếu hiển nhiên"),
 });
 
 export const ContentBrief = z.object({
@@ -148,20 +142,18 @@ export const ContentBrief = z.object({
   audience: z.string(),
   angle: z.string().describe("Góc viết khác biệt để thắng SERP và được AI trích dẫn"),
   format: z.string(),
-  wordCount: z.object({ min: z.number().int(), max: z.number().int() }),
+  wordCountMin: z.number().int(),
+  wordCountMax: z.number().int(),
   tone: z.string(),
   outline: z.array(OutlineItem).describe("Bắt đầu bằng H1, rồi H2/H3 theo thứ tự"),
-  eeat: z.object({
-    author: z.string().describe("Tác giả cần có chuyên môn gì, chức danh"),
-    experienceSignals: z.array(z.string()).describe("Bằng chứng kinh nghiệm thực tế cần đưa vào"),
-    evidenceNeeded: z.array(z.string()).describe("Số liệu, test, ảnh thực tế cần có"),
-    sourcesToCite: z.array(SourceToCite),
-  }),
+  eeatAuthor: z.string().describe("Tác giả cần có chuyên môn gì, chức danh"),
+  eeatExperienceSignals: z.array(z.string()).describe("Bằng chứng kinh nghiệm thực tế cần đưa vào"),
+  eeatEvidenceNeeded: z.array(z.string()).describe("Số liệu, test, ảnh thực tế cần có"),
+  eeatSources: z.array(z.string()).describe("Nguồn uy tín nên dẫn, mỗi mục: 'Tên nguồn — lý do' (kèm URL nếu chắc chắn tồn tại)"),
   geoChecklist: z.array(GeoChecklistItem),
-  schemaPlan: z.array(SchemaPlanItem),
-  multiFormat: z.array(MultiFormatItem),
-  internalLinks: z.array(z.object({ to: z.string(), anchor: z.string() })),
-  externalLinks: z.array(z.object({ to: z.string(), anchor: z.string(), why: z.string() })),
+  schemaPlan: z.array(z.string()).describe("Mỗi mục: 'Type: trường1, trường2 — lý do', vd 'FAQPage: mainEntity — mục FAQ'"),
+  multiFormat: z.array(z.string()).describe("Mỗi mục: 'loại: mô tả (alt: ...)' — loại gồm image, infographic, table, video, pdf, calculator, checklist"),
+  links: z.array(BriefLink),
   faq: z.array(z.object({ question: z.string(), answerDraft: z.string() })),
   updateCadence: z.string().describe("Tần suất cập nhật đề xuất và lý do"),
   doNot: z.array(z.string()).describe("Điều writer phải tránh"),

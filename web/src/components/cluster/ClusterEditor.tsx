@@ -227,7 +227,7 @@ export function ClusterEditor({ projectId, clusterId, initial, model, canGenerat
               <ul style={{ display: "grid", gap: 10 }}>
                 {meta.cannibalization.map((w, i) => (
                   <li key={`m${i}`} className="body-s">
-                    <div className="row" style={{ gap: 6 }}>{w.nodeIds.map((id) => <button key={id} onClick={() => setSelectedId(id)} style={{ background: "none", border: 0, padding: 0, color: "var(--fg-1)", font: "inherit", fontWeight: 500, cursor: "pointer", textDecoration: "underline" }}>{titleOf(id)}</button>)}</div>
+                    <div className="row" style={{ gap: 6 }}>{w.nodeIds.map((id) => <button key={id} onClick={() => setSelectedId(id)} style={{ background: "none", border: 0, padding: 0, color: "var(--fg-1)", font: "inherit", fontWeight: 500, cursor: "pointer", textDecoration: "underline", textAlign: "left" }}>{titleOf(id)}</button>)}</div>
                     <div className="caption">{w.reason}</div>
                     <div className="caption" style={{ color: "var(--success)" }}>Gợi ý: {w.fix}</div>
                   </li>
