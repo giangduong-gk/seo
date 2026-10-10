@@ -76,6 +76,9 @@ export async function generateBrief(project: ProjectProfile, input: BriefInput, 
 }
 
 /** Xuất brief ra Markdown để giao cho writer / dán vào Docs. */
+/** Giá trị nhiều dòng trong một mục danh sách: thụt đầu dòng các dòng sau để Markdown không vỡ cấu trúc. */
+const ml = (v: string) => v.replace(/\r?\n/g, "\n  ");
+
 export function briefToMarkdown(b: ContentBrief, meta?: { project?: string; createdAt?: Date }): string {
   const L: string[] = [];
   L.push(`# Content Brief: ${b.title}`);
@@ -84,17 +87,17 @@ export function briefToMarkdown(b: ContentBrief, meta?: { project?: string; crea
   L.push(`- **Từ khoá mục tiêu:** ${b.targetKeyword}`);
   L.push(`- **Ý định:** ${b.intent}`);
   L.push(`- **Slug:** /${b.slug}`);
-  L.push(`- **Meta description:** ${b.metaDescription}`);
-  L.push(`- **Đối tượng:** ${b.audience}`);
-  L.push(`- **Góc viết:** ${b.angle}`);
-  L.push(`- **Định dạng:** ${b.format} · ${b.wordCountMin}–${b.wordCountMax} từ`);
-  L.push(`- **Giọng văn:** ${b.tone}`);
-  L.push(`- **Cập nhật:** ${b.updateCadence}`);
+  L.push(`- **Meta description:** ${ml(b.metaDescription)}`);
+  L.push(`- **Đối tượng:** ${ml(b.audience)}`);
+  L.push(`- **Góc viết:** ${ml(b.angle)}`);
+  L.push(`- **Định dạng:** ${ml(b.format)} · ${b.wordCountMin}–${b.wordCountMax} từ`);
+  L.push(`- **Giọng văn:** ${ml(b.tone)}`);
+  L.push(`- **Cập nhật:** ${ml(b.updateCadence)}`);
   L.push("", "## Outline");
   for (const o of b.outline) {
     L.push(`${"#".repeat(o.level + 1)} ${o.heading}${o.wordCount ? ` _(~${o.wordCount} từ)_` : ""}`);
     if (o.answerFirst) L.push(`> **Answer-first:** ${o.answerFirst}`);
-    if (o.notes) L.push(`- Ghi chú: ${o.notes}`);
+    if (o.notes) L.push(`- Ghi chú: ${ml(o.notes)}`);
     if (o.keywords.length) L.push(`- Từ khoá: ${o.keywords.join(", ")}`);
     L.push("");
   }
