@@ -43,3 +43,9 @@ next-env.d.ts
 # local
 .env
 prisma/dev.db*
+
+# testing (QA)
+test.db*
+prisma/test.db*
+playwright-report/
+test-results/
