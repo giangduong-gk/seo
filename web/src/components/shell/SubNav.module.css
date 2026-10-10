@@ -1,0 +1,7 @@
+.nav { display: flex; gap: 2px; border-bottom: 1px solid var(--line-1); overflow-x: auto; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.item { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; color: var(--fg-2); font: 500 14px/1 var(--font-body); white-space: nowrap; border-radius: var(--radius-s) var(--radius-s) 0 0; transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); }
+.item:hover { color: var(--fg-1); background: var(--state-1); }
+.active { color: var(--fg-1); }
+.active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px; background: var(--volt); border-radius: 2px; }
+.count { font: var(--text-micro); color: var(--fg-3); background: var(--bg-3); padding: 2px 6px; border-radius: var(--radius-badge); }

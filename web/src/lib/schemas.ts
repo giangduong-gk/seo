@@ -71,3 +71,99 @@ export const EntityProfile = z.object({
   sameAs: z.array(z.string()).optional(),
 });
 export type EntityProfile = z.infer<typeof EntityProfile>;
+
+/* ───────────── Sprint 2: Topic Cluster ───────────── */
+
+export const ClusterNode = z.object({
+  id: z.string().describe("slug ngắn, duy nhất trong map, vd: pillar, c1, c1-s1"),
+  kind: z.enum(["pillar", "cluster", "supporting"]),
+  parentId: z.string().nullable().describe("pillar → null; cluster → 'pillar'; supporting → id của cluster cha"),
+  title: z.string().describe("Tiêu đề bài viết đề xuất"),
+  targetKeyword: z.string(),
+  intent: Intent,
+  summary: z.string().describe("1–2 câu: bài này trả lời điều gì, khác bài khác ở đâu"),
+  secondaryKeywords: z.array(z.string()),
+  format: z.string().describe("guide, listicle, so sánh, review, landing..."),
+  priority: z.enum(["high", "medium", "low"]),
+});
+export type ClusterNode = z.infer<typeof ClusterNode>;
+
+export const InternalLink = z.object({
+  fromId: z.string(),
+  toId: z.string(),
+  anchor: z.string(),
+  why: z.string().nullable(),
+});
+
+export const CannibalizationWarning = z.object({
+  nodeIds: z.array(z.string()).min(2),
+  reason: z.string(),
+  fix: z.string().describe("Gộp bài, đổi ý định, hay đổi từ khoá mục tiêu"),
+});
+
+export const ClusterMap = z.object({
+  pillarTitle: z.string(),
+  pillarKeyword: z.string(),
+  strategy: z.string().describe("3–5 câu: logic của cluster và thứ tự ưu tiên viết"),
+  nodes: z.array(ClusterNode).describe("Đúng 1 node kind=pillar, 4–8 cluster, 0–3 supporting mỗi cluster"),
+  links: z.array(InternalLink),
+  cannibalization: z.array(CannibalizationWarning),
+});
+export type ClusterMap = z.infer<typeof ClusterMap>;
+
+/** Dữ liệu lưu DB: map + vị trí node người dùng đã kéo. */
+export type StoredClusterMap = ClusterMap & { positions?: Record<string, { x: number; y: number }> };
+
+/* ───────────── Sprint 2: Content Brief ───────────── */
+
+export const OutlineItem = z.object({
+  level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  heading: z.string(),
+  answerFirst: z.string().nullable().describe("Câu trả lời trực tiếp 1–2 câu mở đầu mục (H2/H3)"),
+  notes: z.string().nullable().describe("Điểm cần nói, dữ liệu cần dẫn, định dạng (bảng, bước, ảnh)"),
+  keywords: z.array(z.string()),
+  wordCount: z.number().int().nullable(),
+});
+
+export const SourceToCite = z.object({ name: z.string(), url: z.string().nullable(), why: z.string() });
+
+export const SchemaPlanItem = z.object({
+  type: z.string().describe("schema.org type: Article, FAQPage, HowTo, Product, Organization, Person, BreadcrumbList"),
+  fields: z.array(z.string()),
+  why: z.string(),
+});
+
+export const MultiFormatItem = z.object({
+  type: z.enum(["image", "infographic", "table", "video", "pdf", "calculator", "checklist", "other"]),
+  description: z.string(),
+  altText: z.string().nullable(),
+});
+
+export const ContentBrief = z.object({
+  title: z.string().describe("≤ 60 ký tự, có năm nếu hợp lý"),
+  slug: z.string(),
+  metaDescription: z.string().describe("≤ 155 ký tự"),
+  targetKeyword: z.string(),
+  intent: Intent,
+  audience: z.string(),
+  angle: z.string().describe("Góc viết khác biệt để thắng SERP và được AI trích dẫn"),
+  format: z.string(),
+  wordCount: z.object({ min: z.number().int(), max: z.number().int() }),
+  tone: z.string(),
+  outline: z.array(OutlineItem).describe("Bắt đầu bằng H1, rồi H2/H3 theo thứ tự"),
+  eeat: z.object({
+    author: z.string().describe("Tác giả cần có chuyên môn gì, chức danh"),
+    experienceSignals: z.array(z.string()).describe("Bằng chứng kinh nghiệm thực tế cần đưa vào"),
+    evidenceNeeded: z.array(z.string()).describe("Số liệu, test, ảnh thực tế cần có"),
+    sourcesToCite: z.array(SourceToCite),
+  }),
+  geoChecklist: z.array(GeoChecklistItem),
+  schemaPlan: z.array(SchemaPlanItem),
+  multiFormat: z.array(MultiFormatItem),
+  internalLinks: z.array(z.object({ to: z.string(), anchor: z.string() })),
+  externalLinks: z.array(z.object({ to: z.string(), anchor: z.string(), why: z.string() })),
+  faq: z.array(z.object({ question: z.string(), answerDraft: z.string() })),
+  updateCadence: z.string().describe("Tần suất cập nhật đề xuất và lý do"),
+  doNot: z.array(z.string()).describe("Điều writer phải tránh"),
+});
+export type ContentBrief = z.infer<typeof ContentBrief>;

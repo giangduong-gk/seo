@@ -17,8 +17,13 @@ prompts/standards-2026.md   bộ tiêu chuẩn SEO/GEO 2026 (system prompt, cach
 prisma/schema.prisma        Project · Keyword · Analysis · AiUsage
 src/lib/claude.ts           client, model, ghi chi phí, xử lý refusal
 src/lib/analyze.ts          pipeline: web search SERP → structured analysis (Zod)
+src/lib/cluster.ts          sinh Topic Cluster map (pillar/cluster/supporting, link, cannibalization)
+src/lib/overlap.ts          rule engine phát hiện từ khoá trùng ý định (không tốn token)
+src/lib/brief.ts            sinh Content Brief + xuất Markdown
 src/lib/schemas.ts          Zod: KeywordAnalysis, EntityProfile…
 src/styles/tokens/*.css     token AiDoIt v1.13.2 (copy nguyên, font qua next/font)
 src/components/ui/*         Button, Field, Badge, Chip, Progress, Panel, Table…
-src/app/                    / (dự án) · /projects/[id] · /projects/[id]/analyses/[id] · /usage
+src/components/cluster/*    editor Topic Cluster (React Flow, kéo thả, lưu vị trí)
+src/app/                    / · /projects/[id] · …/analyses/[id] · …/clusters/[id] · …/briefs/[id] · /usage
+src/app/api/briefs/[id]/markdown  xuất brief .md
 ```

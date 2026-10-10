@@ -1,0 +1,60 @@
+{
+  "title": "Trả góp iPhone 17 Pro Max 0%: Tính tổng chi phí 2026",
+  "slug": "tra-gop-iphone-17-pro-max",
+  "metaDescription": "Hướng dẫn trả góp iPhone 17 Pro Max 0% qua thẻ tín dụng và công ty tài chính: điều kiện, kỳ hạn, phí ẩn và tổng chi phí thực tế từng gói.",
+  "targetKeyword": "iphone 17 pro max trả góp",
+  "intent": "transactional",
+  "audience": "Người đã quyết định mua iPhone 17 Pro Max nhưng cần chia nhỏ khoản thanh toán; quan tâm phí ẩn và thủ tục.",
+  "angle": "Bảng tính tổng chi phí thực tế của từng hình thức trả góp, nêu rõ phí chuyển đổi và bảo hiểm khoản vay mà đa số bài không nói.",
+  "format": "how-to kèm bảng tính",
+  "wordCount": { "min": 1400, "max": 1900 },
+  "tone": "Thân thiện, rõ ràng, không hù doạ; xưng 'Giá Kho' – 'bạn'.",
+  "outline": [
+    { "level": 1, "heading": "Trả góp iPhone 17 Pro Max 0%: tính tổng chi phí trước khi ký", "answerFirst": null, "notes": "Mở bài nêu ngay: có 2 hình thức, tổng chi phí chênh 0–1,8 triệu tuỳ gói.", "keywords": ["iphone 17 pro max trả góp"], "wordCount": 120 },
+    { "level": 2, "heading": "Trả góp iPhone 17 Pro Max có thật sự 0%?", "answerFirst": "Lãi suất 0% là thật nhưng thường kèm phí chuyển đổi 1–3% hoặc phí hồ sơ; tổng chi phí vì vậy cao hơn giá niêm yết.", "notes": "Giải thích ai chịu lãi; dẫn nguồn điều khoản ngân hàng.", "keywords": ["trả góp 0%", "phí chuyển đổi trả góp"], "wordCount": 220 },
+    { "level": 2, "heading": "Hai cách trả góp và điều kiện", "answerFirst": "Có hai cách: qua thẻ tín dụng (cần hạn mức, duyệt tức thì) và qua công ty tài chính (cần CCCD, duyệt 15–30 phút).", "notes": "Bảng so sánh điều kiện, giấy tờ, thời gian duyệt.", "keywords": ["trả góp qua thẻ tín dụng", "trả góp công ty tài chính"], "wordCount": 300 },
+    { "level": 3, "heading": "Qua thẻ tín dụng", "answerFirst": "Chọn kỳ hạn 6–12 tháng, phí chuyển đổi do ngân hàng quy định.", "notes": "Liệt kê ngân hàng phổ biến.", "keywords": [], "wordCount": 150 },
+    { "level": 3, "heading": "Qua công ty tài chính", "answerFirst": "Trả trước 20–50%, kỳ hạn tới 12 tháng, có thể kèm bảo hiểm khoản vay.", "notes": "Nêu rõ phí bảo hiểm nếu có.", "keywords": [], "wordCount": 150 },
+    { "level": 2, "heading": "Bảng tính tổng chi phí từng gói", "answerFirst": "Với giá 34,99 triệu, gói thẻ 12 tháng phí 2% tốn thêm khoảng 700 nghìn; gói tài chính trả trước 30% có thể tốn thêm 1,2–1,8 triệu.", "notes": "Bảng + công thức; ghi ngày cập nhật.", "keywords": ["tổng chi phí trả góp"], "wordCount": 320 },
+    { "level": 2, "heading": "Thủ tục trả góp tại Giá Kho: 4 bước", "answerFirst": "Chọn máy, chọn gói, nộp giấy tờ, ký hợp đồng — khoảng 20 phút.", "notes": "HowTo schema; ảnh thực tế quầy giao dịch.", "keywords": ["thủ tục trả góp iphone"], "wordCount": 220 },
+    { "level": 2, "heading": "Câu hỏi thường gặp", "answerFirst": null, "notes": "FAQPage schema.", "keywords": [], "wordCount": 200 }
+  ],
+  "eeat": {
+    "author": "Nhân viên tư vấn tài chính tại cửa hàng, ≥ 2 năm làm hồ sơ trả góp, có tên và ảnh.",
+    "experienceSignals": ["Ảnh màn hình bảng tính thực tế của một hồ sơ (che thông tin cá nhân)", "Trích lời tư vấn viên về lỗi khách hay gặp"],
+    "evidenceNeeded": ["Biểu phí chuyển đổi trả góp của 3 ngân hàng, kèm ngày tra cứu", "Điều kiện duyệt của công ty tài chính đối tác"],
+    "sourcesToCite": [
+      { "name": "Biểu phí thẻ tín dụng của ngân hàng đối tác", "url": null, "why": "Chứng minh con số phí chuyển đổi" },
+      { "name": "Thông tư NHNN về cho vay tiêu dùng", "url": null, "why": "Khung pháp lý về lãi suất và phí" }
+    ]
+  },
+  "geoChecklist": [
+    { "id": "answer-first", "label": "Mỗi H2 mở bằng câu trả lời có số liệu", "why": "AI trích câu đứng độc lập", "priority": "must" },
+    { "id": "table", "label": "Bảng tổng chi phí có ngày cập nhật", "why": "Dữ liệu RAG-ready", "priority": "must" },
+    { "id": "howto", "label": "Schema HowTo cho 4 bước", "why": "Rich result + máy hiểu quy trình", "priority": "should" },
+    { "id": "author", "label": "Box tác giả có chức danh", "why": "E-E-A-T", "priority": "should" }
+  ],
+  "schemaPlan": [
+    { "type": "Article", "fields": ["headline", "author", "datePublished", "dateModified"], "why": "Bài hướng dẫn chuẩn" },
+    { "type": "HowTo", "fields": ["step[]", "totalTime", "supply"], "why": "Thủ tục 4 bước" },
+    { "type": "FAQPage", "fields": ["mainEntity[]"], "why": "Mục FAQ" }
+  ],
+  "multiFormat": [
+    { "type": "table", "description": "Bảng tổng chi phí theo gói và kỳ hạn", "altText": "Bảng so sánh tổng chi phí trả góp iPhone 17 Pro Max" },
+    { "type": "calculator", "description": "Máy tính trả góp nhập giá, trả trước, kỳ hạn", "altText": null },
+    { "type": "image", "description": "Ảnh quầy làm hồ sơ trả góp tại cửa hàng", "altText": "Khách hàng làm thủ tục trả góp iPhone tại Giá Kho" }
+  ],
+  "internalLinks": [
+    { "to": "Giá iPhone 17 Pro Max mới nhất theo dung lượng", "anchor": "bảng giá iPhone 17 Pro Max mới nhất" },
+    { "to": "Hướng dẫn mua iPhone 17 Pro Max 2026", "anchor": "hướng dẫn mua iPhone 17 Pro Max" }
+  ],
+  "externalLinks": [
+    { "to": "Trang biểu phí ngân hàng đối tác", "anchor": "biểu phí chuyển đổi trả góp", "why": "Nguồn sơ cấp cho con số phí" }
+  ],
+  "faq": [
+    { "question": "Trả góp iPhone 17 Pro Max cần giấy tờ gì?", "answerDraft": "Qua thẻ tín dụng chỉ cần thẻ; qua công ty tài chính cần CCCD và đôi khi thêm giấy tờ thu nhập." },
+    { "question": "Trả góp 0% có phí ẩn không?", "answerDraft": "Có thể có phí chuyển đổi 1–3% hoặc phí bảo hiểm khoản vay; hỏi rõ tổng số tiền phải trả trước khi ký." }
+  ],
+  "updateCadence": "Cập nhật mỗi tháng theo biểu phí ngân hàng và khi giá máy thay đổi.",
+  "doNot": ["Không hứa 'duyệt 100%'", "Không giấu phí chuyển đổi", "Không dùng số liệu không có ngày"]
+}

@@ -2,7 +2,8 @@ import { ChevronRight, Search } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, EmptyState, Panel, SystemNotice } from "@/components/ui";
-import { hasApiKey, MODELS } from "@/lib/claude";
+import { hasApiKey } from "@/lib/claude";
+import { ProjectHeader } from "./ProjectHeader";
 import { prisma } from "@/lib/db";
 import { KeywordForm } from "./KeywordForm";
 import { IntentBadge } from "./IntentBadge";
@@ -17,21 +18,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     include: { analyses: { orderBy: { createdAt: "desc" }, include: { keyword: true } } },
   });
   if (!project) notFound();
-  const usage = await prisma.aiUsage.aggregate({ where: { projectId: id }, _sum: { costUsd: true } });
 
   return (
     <div className="container stack page-in">
-      <nav className="caption" aria-label="Breadcrumb"><Link href="/">Dự án</Link> / {project.name}</nav>
-      <div className="row-head">
-        <div className="text">
-          <div className="micro">{[project.domain, project.industry, project.locale].filter(Boolean).join(" · ")}</div>
-          <h1 className="display">{project.name}</h1>
-        </div>
-        <div className="actions">
-          <Badge tone="outline">{MODELS.analysis}</Badge>
-          <Badge tone="neutral" title="Chi phí AI ước tính">${(usage._sum.costUsd ?? 0).toFixed(3)}</Badge>
-        </div>
-      </div>
+      <ProjectHeader projectId={project.id} active="analyses" />
 
       {!hasApiKey() && <SystemNotice tone="amber" title="Chưa cấu hình ANTHROPIC_API_KEY">Thêm khoá vào <code className="mono">web/.env</code> để chạy phân tích.</SystemNotice>}
 

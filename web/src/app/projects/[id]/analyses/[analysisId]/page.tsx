@@ -5,6 +5,8 @@ import { Badge, Chip, Panel, Progress, SystemNotice, Table } from "@/components/
 import { prisma } from "@/lib/db";
 import { KeywordAnalysis } from "@/lib/schemas";
 import { IntentBadge } from "../../IntentBadge";
+import { BriefForm } from "../../briefs/BriefForm";
+import { hasApiKey } from "@/lib/claude";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +61,9 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
             </Badge>
             <Badge tone="outline">{a.model}</Badge>
           </div>
+        </div>
+        <div className="actions">
+          <BriefForm projectId={a.projectId} defaultKeyword={r.keyword} disabled={!hasApiKey()} compact />
         </div>
       </div>
 

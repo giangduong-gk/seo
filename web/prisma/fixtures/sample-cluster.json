@@ -1,0 +1,25 @@
+{
+  "pillarTitle": "Hướng dẫn mua iPhone 17 Pro Max 2026: giá, phiên bản, trả góp",
+  "pillarKeyword": "mua iphone 17 pro max",
+  "strategy": "Pillar bao quát toàn bộ hành trình mua. Cluster tách theo ý định: giá (commercial), trả góp (transactional), so sánh (informational), màu/dung lượng (informational). Viết cluster giá trước vì volume cao và gần chuyển đổi, rồi trả góp, rồi so sánh.",
+  "nodes": [
+    { "id": "pillar", "kind": "pillar", "parentId": null, "title": "Hướng dẫn mua iPhone 17 Pro Max 2026", "targetKeyword": "mua iphone 17 pro max", "intent": "commercial", "summary": "Bài tổng quan: nên mua bản nào, ở đâu, giá và trả góp; link tới mọi cluster.", "secondaryKeywords": ["iphone 17 pro max", "có nên mua iphone 17 pro max"], "format": "guide", "priority": "high" },
+    { "id": "c1", "kind": "cluster", "parentId": "pillar", "title": "Giá iPhone 17 Pro Max mới nhất theo dung lượng", "targetKeyword": "giá iphone 17 pro max", "intent": "commercial", "summary": "Bảng giá cập nhật hằng ngày, chênh lệch đại lý.", "secondaryKeywords": ["iphone 17 pro max giá bao nhiêu", "iphone 17 pro max 256gb giá"], "format": "price guide", "priority": "high" },
+    { "id": "c1-s1", "kind": "supporting", "parentId": "c1", "title": "Khi nào iPhone 17 Pro Max giảm giá?", "targetKeyword": "khi nào iphone 17 pro max giảm giá", "intent": "informational", "summary": "Lịch sử giảm giá các đời Pro Max và dự đoán.", "secondaryKeywords": [], "format": "analysis", "priority": "medium" },
+    { "id": "c2", "kind": "cluster", "parentId": "pillar", "title": "Trả góp iPhone 17 Pro Max 0%: tính tổng chi phí", "targetKeyword": "iphone 17 pro max trả góp", "intent": "transactional", "summary": "Điều kiện, kỳ hạn, chi phí thực tế từng gói.", "secondaryKeywords": ["trả góp 0% iphone 17 pro max"], "format": "how-to + calculator", "priority": "high" },
+    { "id": "c3", "kind": "cluster", "parentId": "pillar", "title": "iPhone 17 Pro Max vs 16 Pro Max: có đáng nâng cấp?", "targetKeyword": "so sánh iphone 17 pro max và 16 pro max", "intent": "informational", "summary": "Bảng so sánh thông số, camera, pin, giá.", "secondaryKeywords": ["nên mua iphone 17 pro max hay 16 pro max"], "format": "comparison", "priority": "medium" },
+    { "id": "c4", "kind": "cluster", "parentId": "pillar", "title": "iPhone 17 Pro Max có mấy màu, nên chọn dung lượng nào?", "targetKeyword": "iphone 17 pro max màu nào đẹp", "intent": "informational", "summary": "Màu sắc thực tế, dung lượng phù hợp từng nhu cầu.", "secondaryKeywords": ["iphone 17 pro max có mấy màu"], "format": "listicle", "priority": "low" }
+  ],
+  "links": [
+    { "fromId": "pillar", "toId": "c1", "anchor": "bảng giá iPhone 17 Pro Max mới nhất", "why": null },
+    { "fromId": "c1", "toId": "pillar", "anchor": "hướng dẫn mua iPhone 17 Pro Max", "why": null },
+    { "fromId": "pillar", "toId": "c2", "anchor": "tính trả góp iPhone 17 Pro Max", "why": null },
+    { "fromId": "pillar", "toId": "c3", "anchor": "so sánh với 16 Pro Max", "why": null },
+    { "fromId": "pillar", "toId": "c4", "anchor": "chọn màu và dung lượng", "why": null },
+    { "fromId": "c1", "toId": "c1-s1", "anchor": "thời điểm giảm giá", "why": null },
+    { "fromId": "c1", "toId": "c2", "anchor": "mua trả góp 0%", "why": "Người xem giá thường muốn biết trả góp" }
+  ],
+  "cannibalization": [
+    { "nodeIds": ["pillar", "c1"], "reason": "Pillar và cluster giá đều có ý định commercial và cùng nhắc 'giá'.", "fix": "Pillar chỉ nêu khoảng giá và link sang c1; không đặt bảng giá chi tiết ở pillar." }
+  ]
+}

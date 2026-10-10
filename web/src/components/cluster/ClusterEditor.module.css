@@ -1,0 +1,51 @@
+.layout { display: grid; gap: var(--cms-grid-gap); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; } }
+.canvas { position: relative; height: 560px; min-height: 60vh; background: var(--bg-1); border: 1px solid var(--line-1); border-radius: var(--cms-panel-radius); overflow: hidden; }
+.toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border-bottom: 1px solid var(--line-1); background: var(--bg-2); }
+.toolbar .spacer { flex: 1 1 auto; }
+.flow { height: calc(100% - 53px); }
+.status { font: var(--text-caption); color: var(--text-muted); }
+.dirty { color: var(--warning); }
+.aside { display: flex; flex-direction: column; gap: var(--cms-grid-gap); position: var(--aside-position); top: calc(var(--header-offset) + 12px); max-height: var(--aside-max-h); overflow: auto; }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font: var(--text-caption); color: var(--text-secondary); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+/* Node */
+.node { min-width: 180px; max-width: 240px; padding: 10px 12px; border-radius: var(--radius-m); background: var(--bg-2); border: 1px solid var(--line-2); color: var(--fg-1); box-shadow: var(--shadow-raised); transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); }
+.node:hover { border-color: var(--line-3); }
+.nodeSelected { border-color: var(--volt) !important; box-shadow: var(--focus-ring), var(--shadow-raised); }
+.pillar { background: var(--bg-3); border-color: rgba(255,234,0,0.35); min-width: 220px; }
+.supporting { background: var(--bg-1); border-style: dashed; min-width: 160px; }
+.kind { font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--fg-3); display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.pillar .kind { color: var(--volt); }
+.title { font: 600 13px/1.3 var(--font-body); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kw { font: var(--text-mono); color: var(--fg-2); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta { display: flex; gap: 6px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+.handle { width: 8px !important; height: 8px !important; background: var(--fg-3) !important; border: 2px solid var(--bg-1) !important; }
+
+/* React Flow theme overrides */
+/* base.css đặt svg { max-width: 100% } → SVG cạnh (container 0px) bị co về 0 và không vẽ; bỏ giới hạn trong canvas */
+.flow :global(.react-flow svg) { max-width: none; }
+.flow :global(.react-flow__edge-path) { stroke: var(--fg-3); stroke-width: 2; }
+.flow :global(.react-flow__edge:hover .react-flow__edge-path) { stroke: var(--fg-2); }
+.flow :global(.react-flow__edge.selected .react-flow__edge-path) { stroke: var(--volt); }
+.flow :global(.react-flow__edge-textbg) { fill: var(--bg-3); }
+.flow :global(.react-flow__edge-text) { fill: var(--fg-2); font: 500 11px var(--font-body); }
+.flow :global(.react-flow__controls) { box-shadow: var(--shadow-raised); border-radius: var(--radius-s); overflow: hidden; }
+.flow :global(.react-flow__controls-button) { background: var(--bg-3); border-bottom: 1px solid var(--line-1); color: var(--fg-1); fill: var(--fg-1); }
+.flow :global(.react-flow__controls-button:hover) { background: var(--bg-4); }
+.flow :global(.react-flow__minimap) { background: var(--bg-2); border-radius: var(--radius-s); width: 140px; height: 100px; }
+.flow :global(.react-flow__attribution) { background: transparent; color: var(--fg-4); }
+
+.field { display: grid; gap: 4px; }
+.field label { font: var(--text-caption); color: var(--text-secondary); }
+.links { display: grid; gap: 6px; font: var(--text-body-s); }
+.linkRow { display: flex; gap: 8px; align-items: center; }
+.linkRow input { flex: 1 1 auto; min-width: 0; height: 32px; padding: 0 10px; background: var(--bg-1); border: 1px solid var(--line-2); border-radius: var(--radius-s); color: var(--fg-1); font: var(--text-body-s); }
+.linkRow input:focus { outline: none; border-color: var(--volt); box-shadow: var(--focus-ring); }
+.iconBtn { width: 28px; height: 28px; display: grid; place-items: center; border-radius: var(--radius-s); background: transparent; border: 0; color: var(--fg-3); cursor: pointer; }
+.iconBtn:hover { background: var(--state-2); color: var(--danger); }
+/* Nhãn anchor chỉ hiện khi hover/chọn cạnh — tránh chồng chữ ở hàng giữa */
+.flow :global(.react-flow__edge-textwrapper) { display: none; }
+.flow :global(.react-flow__edge:hover .react-flow__edge-textwrapper), .flow :global(.react-flow__edge.selected .react-flow__edge-textwrapper) { display: block; }

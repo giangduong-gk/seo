@@ -22,6 +22,8 @@ model Project {
   keywords      Keyword[]
   analyses      Analysis[]
   usage         AiUsage[]
+  clusters      Cluster[]
+  briefs        Brief[]
 }
 
 model Keyword {
@@ -63,4 +65,30 @@ model AiUsage {
   cacheWriteTokens Int     @default(0)
   costUsd         Float
   createdAt       DateTime @default(now())
+}
+
+model Cluster {
+  id            String   @id @default(cuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title         String
+  pillarKeyword String
+  model         String
+  data          String   // JSON ClusterMap (kèm vị trí node đã kéo)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  briefs        Brief[]
+}
+
+model Brief {
+  id            String   @id @default(cuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clusterId     String?
+  cluster       Cluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  targetKeyword String
+  title         String
+  model         String
+  data          String   // JSON ContentBrief
+  createdAt     DateTime @default(now())
 }
