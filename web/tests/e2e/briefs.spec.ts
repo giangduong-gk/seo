@@ -20,7 +20,7 @@ test.describe("Content Brief", () => {
       await expect(page.getByRole("region", { name })).toBeVisible();
     }
     await expect(page.getByRole("button", { name: "Copy Markdown" })).toBeVisible();
-    const dl = page.getByRole("link", { name: /Tải \.md|\.md/i }).first();
+    const dl = page.getByRole("link", { name: /Tải Markdown/i });
     await expect(dl).toHaveAttribute("href", `/api/briefs/${DEMO.briefId}/markdown?download=1`);
   });
 

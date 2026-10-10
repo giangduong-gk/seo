@@ -18,6 +18,8 @@ export const test = base.extend<{ errors: CollectedErrors }>({
         if (m.type() !== "error") return;
         const text = m.text();
         if (IGNORED_CONSOLE.some((r) => r.test(text))) return;
+        // Điều hướng chủ ý tới trang 404: trình duyệt log "Failed to load resource ... 404" cho chính document → không phải lỗi app
+        if (/Failed to load resource/.test(text) && m.location().url === page.url()) return;
         errors.consoleErrors.push(text);
       });
       await use(errors);

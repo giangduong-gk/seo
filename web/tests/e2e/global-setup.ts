@@ -1,20 +1,20 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, rmSync } from "node:fs";
 import path from "node:path";
 
 /**
- * Tạo DB SQLite sạch cho e2e: prisma/test.db (Prisma resolve đường dẫn tương đối theo thư mục schema),
- * rồi seed dữ liệu demo (demo-project / demo-cluster / demo-brief) bằng prisma/seed.mjs.
+ * Chuẩn bị DB SQLite riêng cho e2e: prisma/test.db (Prisma resolve đường dẫn tương đối theo thư mục schema).
+ * 1. `prisma db push` — tạo file/đồng bộ schema (idempotent).
+ * 2. `reset-db.mjs` — xoá dữ liệu cũ nhưng GIỮ NGUYÊN FILE: Playwright khởi động webServer TRƯỚC globalSetup,
+ *    dev server có thể đã mở file; xoá file lúc này sẽ gây "attempt to write a readonly database" (SQLITE_READONLY_DBMOVED).
+ * 3. `prisma/seed.mjs` — dữ liệu demo (demo-project / demo-cluster / demo-brief).
  * Biến môi trường truyền vào process con ghi đè .env (Prisma không override khoá đã có trong process.env).
  */
 export default async function globalSetup() {
   const root = path.resolve(__dirname, "..", "..");
   const env = { ...process.env, DATABASE_URL: "file:./test.db", ANTHROPIC_API_KEY: "" };
-  for (const f of ["prisma/test.db", "prisma/test.db-journal", "prisma/test.db-wal", "prisma/test.db-shm"]) {
-    const p = path.join(root, f);
-    if (existsSync(p)) rmSync(p, { force: true });
-  }
+  const opts = { cwd: root, env, stdio: "inherit" as const };
   const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-  execFileSync(npx, ["prisma", "db", "push", "--skip-generate", "--accept-data-loss"], { cwd: root, env, stdio: "inherit" });
-  execFileSync(process.execPath, ["prisma/seed.mjs"], { cwd: root, env, stdio: "inherit" });
+  execFileSync(npx, ["prisma", "db", "push", "--skip-generate", "--accept-data-loss"], opts);
+  execFileSync(process.execPath, ["tests/e2e/reset-db.mjs"], opts);
+  execFileSync(process.execPath, ["prisma/seed.mjs"], opts);
 }
