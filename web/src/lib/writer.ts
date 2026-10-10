@@ -68,8 +68,8 @@ function writingRules(input: WriterInput): string {
     "- Có mục `## Câu hỏi thường gặp`; mỗi câu hỏi là một heading `### `, câu trả lời ngắn gọn, answer-first ngay câu đầu.",
     `- Ngôn ngữ: ${project.locale}.${project.brandVoice ? ` Giọng văn thương hiệu: ${project.brandVoice}.` : ""}${brief?.tone ? ` Tone theo brief: ${brief.tone}.` : ""}`,
     brief
-      ? `- Độ dài toàn bài: ${brief.wordCountMin}–${brief.wordCountMax} từ (không tính heading).`
-      : "- Độ dài toàn bài: 1200–2000 từ.",
+      ? `- Độ dài toàn bài: ${brief.wordCountMin}–${brief.wordCountMax} từ (không tính heading). KHÔNG vượt quá ${brief.wordCountMax} từ: nếu cần, rút gọn phần giải thích, gộp bảng, bỏ ý trùng lặp; giữ nguyên số liệu, nguồn và FAQ.`
+      : "- Độ dài toàn bài: 1200–2000 từ, không vượt quá 2000 từ.",
     "- Từ khoá mục tiêu xuất hiện tự nhiên ở H1, đoạn mở đầu, ít nhất một H2 và phần kết; không nhồi nhét.",
     "- Không dùng ký tự lạ, không emoji, không viết hoa toàn bộ câu.",
   ];
