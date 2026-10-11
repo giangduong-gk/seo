@@ -49,3 +49,6 @@ test.db*
 prisma/test.db*
 playwright-report/
 test-results/
+
+# thư mục build song song (NEXT_DIST_DIR)
+/.next-*

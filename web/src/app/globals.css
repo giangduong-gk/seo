@@ -9,6 +9,7 @@
 @import '../styles/tokens/responsive.css';
 @import '../styles/tokens/themes.css';
 @import '../styles/base.css';
+@import '../styles/motion.css';
 
 html { color-scheme: dark; }
 body {
@@ -21,21 +22,22 @@ h1, h2, h3, p { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 
 /* App-level utilities (tokens only) */
-.display { font: var(--text-display-m); font-stretch: var(--display-stretch); text-transform: uppercase; letter-spacing: var(--tracking-display); }
+.display { font: var(--text-display-m); font-stretch: var(--display-stretch); text-transform: uppercase; letter-spacing: var(--tracking-display);
+  line-height: 1.04; /* dấu tiếng Việt chồng tầng (Ự, Ệ, Ỗ) cần chỗ hơn lh 0.95 của DS gốc */ padding-top: 0.06em; overflow-wrap: anywhere; }
 .h1 { font: var(--text-h1); }
 .h2 { font: var(--text-h2); }
 .h3 { font: var(--text-h3); }
 .body-s { font: var(--text-body-s); }
 .caption { font: var(--text-caption); color: var(--text-secondary); }
 .micro { font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--text-muted); }
-.micro + .display, .micro + .h1 { margin-top: 8px; }
+.micro + .display, .micro + .h1, .micro + .h2 { margin-top: 10px; }
 .mono { font: var(--text-mono); font-variant-numeric: tabular-nums; }
 .muted { color: var(--text-muted); }
 .secondary { color: var(--text-secondary); }
 .volt { color: var(--volt); }
 .container { width: 100%; max-width: var(--cms-main-max); margin: 0 auto; padding: var(--cms-main-pad); }
 .stack { display: flex; flex-direction: column; gap: var(--cms-section-gap); }
-.grid-kpi { display: grid; gap: var(--cms-grid-gap); grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr)); }
+.grid-kpi { display: grid; gap: var(--cms-grid-gap); grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); align-items: start; }
 .row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .row-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-6) var(--space-3); flex-wrap: wrap; }
 .row-head > .text { flex: 1 1 320px; min-width: 0; }

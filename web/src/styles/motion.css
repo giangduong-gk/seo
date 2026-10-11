@@ -1,0 +1,91 @@
+/* SEO Studio — lớp hiệu ứng dùng chung, xây trên token motion của AiDoIt (tokens/motion.css + spacing.css).
+   Nguyên tắc DS: ease-out mạnh, không bounce; UI 120–180ms, media/reveal 320–400ms; stagger 40ms, tối đa 6 phần tử.
+   Mọi hiệu ứng tắt khi prefers-reduced-motion (xem cuối file và base.css). */
+
+/* Cuộn mượt cho anchor / mục lục; neo không bị header sticky che */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+section[id], h2[id], h3[id], [data-anchor] { scroll-margin-top: calc(var(--header-offset) + var(--subnav-h, 0px) + 16px); }
+
+/* 1) Vào trang: các con trực tiếp của .stagger hiện lần lượt (6 phần tử đầu), phần còn lại hiện cùng lúc */
+.stagger > * { animation: ds-page-in var(--dur-page) var(--ease-emphasized) both; }
+.stagger > :nth-child(2) { animation-delay: calc(var(--motion-stagger) * 1); }
+.stagger > :nth-child(3) { animation-delay: calc(var(--motion-stagger) * 2); }
+.stagger > :nth-child(4) { animation-delay: calc(var(--motion-stagger) * 3); }
+.stagger > :nth-child(5) { animation-delay: calc(var(--motion-stagger) * 4); }
+.stagger > :nth-child(n + 6) { animation-delay: calc(var(--motion-stagger) * 5); }
+
+/* 2) Hiện khi cuộn tới: scroll-driven animation thuần CSS (Chrome/Edge/Safari mới).
+   Phần tử đã nằm trong viewport lúc tải trang hiển thị ngay ở trạng thái cuối → không nháy, không layout shift.
+   Trình duyệt không hỗ trợ: hiển thị bình thường, không hiệu ứng. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: ds-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 32%;
+    }
+  }
+}
+@keyframes ds-reveal { from { opacity: 0; transform: translateY(var(--motion-rise)); } to { opacity: 1; transform: none; } }
+
+/* 3) Hàng danh sách bấm được: nền state + mũi tên trượt nhẹ */
+.row-link {
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: var(--cms-row-h); padding: 12px var(--cms-panel-pad-x);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.row-link:hover { background: var(--state-1); }
+.row-link:active { background: var(--state-2); }
+.row-link .row-arrow { color: var(--fg-3); flex: none; transition: transform var(--dur-base) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.row-link:hover .row-arrow { color: var(--fg-1); transform: translateX(3px); }
+.row-link:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--volt); }
+
+/* 4) Thẻ tương tác: viền sáng dần, không nhảy layout */
+.card-hover { transition: border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out); }
+.card-hover:hover { border-color: var(--line-3); background: var(--bg-3); }
+
+/* 5) <details> mở/đóng mượt (trình duyệt hỗ trợ interpolate-size + ::details-content), mũi tên xoay */
+@supports (interpolate-size: allow-keywords) {
+  :root { interpolate-size: allow-keywords; }
+  details::details-content {
+    block-size: 0; overflow: clip; opacity: 0;
+    transition: block-size var(--dur-slow) var(--ease-emphasized), opacity var(--dur-base) var(--ease-out), content-visibility var(--dur-slow) allow-discrete;
+  }
+  details[open]::details-content { block-size: auto; opacity: 1; }
+}
+summary { cursor: pointer; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary.disclosure { display: inline-flex; align-items: center; gap: 6px; }
+summary.disclosure::before {
+  content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg); transition: transform var(--dur-base) var(--ease-out); flex: none;
+}
+details[open] > summary.disclosure::before { transform: rotate(45deg); }
+
+/* 6) Đếm số / thanh tiến trình chạy từ 0 khi xuất hiện */
+@keyframes ds-grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.grow-x { transform-origin: left center; animation: ds-grow-x var(--dur-media) var(--ease-emphasized) both; }
+
+/* 7) Skeleton đồng bộ với nền tối */
+.skeleton {
+  display: block; border-radius: var(--radius-s);
+  background: linear-gradient(90deg, var(--bg-3) 0%, var(--bg-4) 50%, var(--bg-3) 100%);
+  background-size: 200% 100%; animation: ds-shimmer 1.4s var(--ease-in-out) infinite;
+}
+
+/* 8) Thanh cuộn mảnh theo token */
+* { scrollbar-width: thin; scrollbar-color: var(--bg-4) transparent; }
+::selection { background: var(--volt-soft); color: var(--fg-1); }
+
+/* 9) Cuộn ngang có gợi ý mép (tabs, chip) */
+.scroll-x { overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; }
+.scroll-x::-webkit-scrollbar { display: none; }
+.scroll-x > * { scroll-snap-align: start; }
+.fade-x { mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 24px), transparent 100%); } /* lint-allow-color: mask alpha */
+
+@media (prefers-reduced-motion: reduce) {
+  .stagger > *, .reveal, .grow-x { animation: none !important; }
+  .row-link .row-arrow { transition: none; }
+}

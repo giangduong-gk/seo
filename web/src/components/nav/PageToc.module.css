@@ -1,0 +1,17 @@
+/* Mục lục trang dài: dọc + sticky từ 1200px; dưới đó là dải chip cuộn ngang dính dưới header */
+.mobile { position: sticky; top: var(--header-offset); z-index: calc(var(--z-sticky) - 1); margin: 0 calc(var(--page-pad-x) * -1); padding: 8px var(--page-pad-x); background: var(--header-bg); backdrop-filter: var(--blur-header); -webkit-backdrop-filter: var(--blur-header); border-bottom: 1px solid var(--line-1); display: flex; gap: 6px; }
+.chip { flex: none; display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: var(--radius-pill); border: 1px solid var(--line-2); color: var(--fg-2); font: 500 13px/1 var(--font-body); white-space: nowrap; transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out); }
+.chip:hover { color: var(--fg-1); background: var(--state-2); }
+.chipActive { color: var(--volt); border-color: rgba(255,234,0,0.28); background: var(--volt-soft); } /* lint-allow-color: viền accent-soft */
+.desktop { display: none; }
+@media (min-width: 1200px) {
+  .mobile { display: none; }
+  .desktop { display: block; position: sticky; top: calc(var(--header-offset) + 24px); align-self: start; max-height: calc(var(--vh-screen) - var(--header-offset) - 48px); overflow: auto; }
+}
+.title { font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--text-muted); margin-bottom: 10px; padding-left: 14px; }
+.list { display: grid; gap: 2px; border-left: 1px solid var(--line-2); }
+.link { position: relative; display: block; padding: 6px 12px 6px 14px; color: var(--fg-3); font: var(--text-body-s); border-radius: 0 var(--radius-s) var(--radius-s) 0; transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); }
+.link:hover { color: var(--fg-1); background: var(--state-1); }
+.link::before { content: ""; position: absolute; left: -1px; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; background: var(--volt); transform: scaleY(0); transition: transform var(--dur-base) var(--ease-out); }
+.active { color: var(--fg-1); }
+.active::before { transform: scaleY(1); }
