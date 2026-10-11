@@ -18,7 +18,7 @@ export default async function ClusterPage({ params }: { params: Promise<{ id: st
   if (!parsed.success) {
     return <div className="container stack page-in"><SystemNotice tone="red" title="Dữ liệu cluster không đúng schema">{parsed.error.issues[0]?.message}</SystemNotice></div>;
   }
-  const map: StoredClusterMap = { ...parsed.data, positions: raw.positions };
+  const map: StoredClusterMap = { ...parsed.data, positions: raw.positions, layout: raw.layout };
 
   return (
     <div className="container stack page-in">

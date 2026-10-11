@@ -34,9 +34,10 @@ html:has([data-subnav]) .header[data-scrolled] { box-shadow: none; }
   position: fixed; left: var(--page-pad-x); top: calc(var(--safe-top) + 8px); z-index: var(--z-modal);
   display: inline-flex; align-items: center; height: var(--control-h-m); padding: 0 var(--control-pad-m);
   border-radius: var(--radius-button); background: var(--volt); color: var(--on-volt); font: 600 14px/1 var(--font-body);
-  transform: translateY(calc(-100% - 16px - var(--safe-top))); transition: transform var(--dur-base) var(--ease-out);
+  transform: translateY(calc(-100% - 16px - var(--safe-top))); opacity: 0; pointer-events: none;
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
 }
-.skip:focus-visible { transform: none; outline: none; box-shadow: var(--focus-ring); }
+.skip:focus-visible { transform: none; opacity: 1; pointer-events: auto; outline: none; box-shadow: var(--focus-ring); }
 
 .main { min-height: calc(var(--vh-screen) - var(--header-offset)); }
 .main:focus { outline: none; }

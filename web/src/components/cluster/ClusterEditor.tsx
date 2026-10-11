@@ -1,8 +1,8 @@
 "use client";
 
 import "@xyflow/react/dist/style.css";
-import { Background, MiniMap, Panel as FlowPanel, ReactFlow, ReactFlowProvider, addEdge, useEdgesState, useNodesState, useReactFlow, type Connection, type Edge, type NodeMouseHandler, type OnConnect } from "@xyflow/react";
-import { ArrowDown, Crosshair, Link2, Maximize2, Minus, Plus, Save, Trash2 } from "lucide-react";
+import { Background, ConnectionLineType, MiniMap, ReactFlow, ReactFlowProvider, useEdgesState, useNodesState, useReactFlow, type Connection, type NodeMouseHandler, type OnConnect } from "@xyflow/react";
+import { ArrowDown, Crosshair, LayoutGrid, Link2, Maximize2, Minus, Plus, Save, Spline, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { saveClusterMap } from "@/app/actions";
@@ -12,6 +12,8 @@ import { Badge, Button, Panel, SystemNotice, Table, useToast } from "@/component
 import { detectKeywordOverlap } from "@/lib/overlap";
 import type { ClusterNode, StoredClusterMap } from "@/lib/schemas";
 import s from "./ClusterEditor.module.css";
+import { EdgeMarkers, buildViewEdges, edgeTypes, type FlowLink, type ViewEdge } from "./edges";
+import { NODE_H, NODE_W, placeNewNode, tidyLayout, type LayoutDir, type Pos } from "./layout";
 import { TopicNode, type TopicNodeType } from "./TopicNode";
 
 const nodeTypes = { topic: TopicNode };
@@ -20,46 +22,24 @@ const PRIORITIES = ["high", "medium", "low"] as const;
 const KIND_TEXT: Record<ClusterNode["kind"], string> = { pillar: "Pillar", cluster: "Cluster", supporting: "Supporting" };
 const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
-/** Bố cục phân tầng: pillar trên cùng, cluster hàng giữa, supporting dưới cluster cha. Cạnh nối từ đáy node cha xuống đỉnh node con. */
-const NODE_W = 240, GAP_X = 36, GAP_Y = 150;
-function tieredLayout(nodes: ClusterNode[]): Record<string, { x: number; y: number }> {
-  const pos: Record<string, { x: number; y: number }> = {};
-  const pillar = nodes.find((n) => n.kind === "pillar");
-  const clusters = nodes.filter((n) => n.kind === "cluster");
-  const kidsOf = (id: string) => nodes.filter((n) => n.kind === "supporting" && n.parentId === id);
-  const widthOf = (c: ClusterNode) => Math.max(1, kidsOf(c.id).length) * (NODE_W + GAP_X);
-  const total = clusters.reduce((acc, c) => acc + widthOf(c), 0);
-  let x = -total / 2;
-  for (const c of clusters) {
-    const w = widthOf(c);
-    pos[c.id] = { x: x + w / 2 - NODE_W / 2, y: GAP_Y + 60 };
-    const kids = kidsOf(c.id);
-    kids.forEach((k, j) => { pos[k.id] = { x: x + j * (NODE_W + GAP_X), y: 2 * (GAP_Y + 60) }; });
-    x += w;
-  }
-  if (pillar) pos[pillar.id] = { x: -NODE_W / 2, y: 0 };
-  // node mồ côi (supporting không có cha hợp lệ) xếp hàng cuối
-  let ox = -total / 2;
-  nodes.forEach((n) => { if (!pos[n.id]) { pos[n.id] = { x: ox, y: 3 * (GAP_Y + 60) }; ox += NODE_W + GAP_X; } });
-  return pos;
-}
-
 const KIND_ORDER = { pillar: 0, cluster: 1, supporting: 2 } as const;
-function toFlowNodes(map: StoredClusterMap, briefs: Record<string, string>): TopicNodeType[] {
-  const layout = tieredLayout(map.nodes);
+function toFlowNodes(map: StoredClusterMap, briefs: Record<string, string>, dir: LayoutDir): TopicNodeType[] {
+  const layout = tidyLayout(map.nodes, dir);
   // thứ tự xuất hiện: pillar → cluster → supporting
   const order = [...map.nodes].sort((a, b) => KIND_ORDER[a.kind] - KIND_ORDER[b.kind]).map((n) => n.id);
   return map.nodes.map((n) => ({
     id: n.id,
     type: "topic",
     position: map.positions?.[n.id] ?? layout[n.id],
-    data: { node: n, hasBrief: Boolean(briefs[n.targetKeyword.toLowerCase()]), i: order.indexOf(n.id) },
+    data: { node: n, hasBrief: Boolean(briefs[n.targetKeyword.toLowerCase()]), i: order.indexOf(n.id), dir },
   }));
 }
 
-function toFlowEdges(map: StoredClusterMap): Edge[] {
+function toFlowLinks(map: StoredClusterMap): FlowLink[] {
   return map.links.map((l) => ({ id: `${l.fromId}->${l.toId}`, source: l.fromId, target: l.toId, label: l.anchor, data: { why: l.why } }));
 }
+
+const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
 type Props = { projectId: string; clusterId: string; initial: StoredClusterMap; model: string; canGenerate: boolean; briefsByKeyword: Record<string, string> };
 
@@ -69,13 +49,17 @@ export function ClusterEditor(props: Props) {
 
 function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKeyword }: Props) {
   const { toast } = useToast();
-  const rf = useReactFlow<TopicNodeType, Edge>();
+  const rf = useReactFlow<TopicNodeType, ViewEdge>();
   const wide = useWide();
   const [meta, setMeta] = useState({ pillarTitle: initial.pillarTitle, pillarKeyword: initial.pillarKeyword, strategy: initial.strategy, cannibalization: initial.cannibalization });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const init = useMemo(() => ({ nodes: toFlowNodes(initial, briefsByKeyword), edges: toFlowEdges(initial) }), []);
+  const [dir, setDir] = useState<LayoutDir>(initial.layout ?? "LR");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const init = useMemo(() => ({ nodes: toFlowNodes(initial, briefsByKeyword, initial.layout ?? "LR"), links: toFlowLinks(initial) }), []);
   const [nodes, setNodes, onNodesChange] = useNodesState<TopicNodeType>(init.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(init.edges);
+  /** `edges` = danh sách internal link (nguồn dữ liệu để lưu); đường vẽ trên canvas được dựng riêng (buildViewEdges). */
+  const [edges, setEdges] = useEdgesState<FlowLink>(init.links);
+  const [showCross, setShowCross] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -111,7 +95,7 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
     if (!id) return;
     const n = rf.getNode(id);
     if (!n) return;
-    const w = n.measured?.width ?? NODE_W, h = n.measured?.height ?? 110;
+    const w = n.measured?.width ?? NODE_W, h = n.measured?.height ?? NODE_H;
     void rf.setCenter(n.position.x + w / 2, n.position.y + h / 2, { zoom: Math.max(rf.getZoom(), 0.9), duration: dur(480) });
   }, [rf]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -139,8 +123,10 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
     const id = `${base}${i}`;
     const parent = nodes.find((n) => n.id === parentId);
     const node: ClusterNode = { id, kind, parentId, title: kind === "cluster" ? "Bài cluster mới" : "Bài supporting mới", targetKeyword: "từ khoá mục tiêu", intent: "informational", summary: "", secondaryKeywords: [], format: "guide", priority: "medium" };
-    const p = parent?.position ?? { x: 0, y: 0 };
-    setNodes((ns) => [...ns.map((n) => (n.selected ? { ...n, selected: false } : n)), { id, type: "topic", position: { x: p.x + (kind === "cluster" ? 280 : 0), y: p.y + (kind === "cluster" ? 0 : 210) }, data: { node, hasBrief: false }, selected: true }]);
+    const siblings = nodes.filter((n) => n.data.node.parentId === parentId).map((n) => n.position);
+    const position = placeNewNode(parent?.position, siblings, dir);
+    setNodes((ns) => [...ns.map((n) => (n.selected ? { ...n, selected: false } : n)), { id, type: "topic", position, data: { node, hasBrief: false, dir }, selected: true }]);
+    // link cha → con mặc định (anchor = tiêu đề), sửa được ở khung bên
     setEdges((es) => [...es, { id: `${parentId}->${id}`, source: parentId, target: id, label: node.title, data: { why: null } }]);
     setSelectedId(id);
     markDirty();
@@ -161,10 +147,46 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
 
   const onConnect: OnConnect = useCallback((c: Connection) => {
     if (!c.source || !c.target || c.source === c.target) return;
+    const id = `${c.source}->${c.target}`;
+    if (edges.some((e) => e.id === id)) { toast({ tone: "info", title: "Link này đã có", description: "Sửa anchor ở khung bên phải." }); return; }
     const target = nodes.find((n) => n.id === c.target)?.data.node;
-    setEdges((es) => addEdge({ ...c, id: `${c.source}->${c.target}`, label: target?.title ?? "", data: { why: null } }, es));
+    setEdges((es) => [...es, { id, source: c.source, target: c.target, label: target?.title ?? "", data: { why: null } }]);
     markDirty();
-  }, [nodes, setEdges]);
+  }, [nodes, edges, setEdges, toast]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ───── Bố cục: tự sắp xếp gọn (có chuyển động), đổi hướng ngang/dọc ───── */
+  const animRef = useRef(0);
+  const animateTo = useCallback((target: Record<string, Pos>, then?: () => void) => {
+    cancelAnimationFrame(animRef.current);
+    const from = new Map(rf.getNodes().map((n) => [n.id, n.position]));
+    const ms = dur(420);
+    if (!ms) { setNodes((ns) => ns.map((n) => (target[n.id] ? { ...n, position: target[n.id] } : n))); then?.(); return; }
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const k = easeOut(Math.min(1, (now - t0) / ms));
+      setNodes((ns) => ns.map((n) => {
+        const a = from.get(n.id), b = target[n.id];
+        return a && b ? { ...n, position: { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k } } : n;
+      }));
+      if (k < 1) animRef.current = requestAnimationFrame(tick); else then?.();
+    };
+    animRef.current = requestAnimationFrame(tick);
+  }, [rf, setNodes]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => cancelAnimationFrame(animRef.current), []);
+
+  const relayout = useCallback((d: LayoutDir = dir) => {
+    const target = tidyLayout(rf.getNodes().map((n) => n.data.node), d);
+    userMoved.current = false;
+    animateTo(target, () => requestAnimationFrame(() => void rf.fitView({ padding: 0.12, maxZoom: 1, duration: dur(360) })));
+    markDirty();
+  }, [dir, rf, animateTo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const changeDir = (d: LayoutDir) => {
+    if (d === dir) return;
+    setDir(d);
+    setNodes((ns) => ns.map((n) => ({ ...n, data: { ...n.data, dir: d } })));
+    relayout(d);
+  };
 
   const onNodeClick: NodeMouseHandler<TopicNodeType> = useCallback((_, n) => setSelectedId(n.id), []);
   const onNodeEnter: NodeMouseHandler<TopicNodeType> = useCallback((_, n) => setHoverId(n.id), []);
@@ -178,15 +200,16 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
     const data: StoredClusterMap = {
       ...meta,
       nodes: topicNodes,
-      links: edges.map((e) => ({ fromId: e.source, toId: e.target, anchor: String(e.label ?? ""), why: (e.data as { why?: string | null } | undefined)?.why ?? null })),
-      positions: Object.fromEntries(nodes.map((n) => [n.id, n.position])),
+      links: edges.map((e) => ({ fromId: e.source, toId: e.target, anchor: String(e.label ?? ""), why: e.data?.why ?? null })),
+      positions: Object.fromEntries(nodes.map((n) => [n.id, { x: Math.round(n.position.x), y: Math.round(n.position.y) }])),
+      layout: dir,
     };
     startTransition(async () => {
       const r = await saveClusterMap(clusterId, data);
       if (r.ok) { setDirty(false); setSavedAt(new Date()); toast({ id: `cluster-save-${clusterId}`, tone: "success", title: "Đã lưu cluster", description: `${topicNodes.length} node · ${edges.length} link` }); }
       else toast({ id: `cluster-save-${clusterId}`, tone: "error", title: "Không lưu được cluster", description: r.error });
     });
-  }, [dirty, pending, meta, topicNodes, edges, nodes, clusterId, toast]);
+  }, [dirty, pending, meta, topicNodes, edges, nodes, clusterId, toast, dir]);
 
   /* ───── Phím tắt + chặn rời trang khi chưa lưu ───── */
   useEffect(() => {
@@ -197,6 +220,7 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
       if ((e.key === "Delete" || e.key === "Backspace") && selected && selected.kind !== "pillar") { e.preventDefault(); removeNode(selected.id); }
       else if (e.key === "Escape" && selectedId) setSelectedId(null);
       else if (e.key === "f" || e.key === "F") { e.preventDefault(); fit(); }
+      else if (e.key === "l" || e.key === "L") { e.preventDefault(); relayout(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -208,20 +232,29 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
     return () => window.removeEventListener("beforeunload", onLeave);
   }, [dirty]);
 
-  /* ───── Làm nổi cạnh của node đang chọn / đang hover ───── */
-  const reduced = useReducedMotion();
-  const viewEdges = useMemo(() => edges.map((e) => {
-    const on = selectedId != null && (e.source === selectedId || e.target === selectedId);
-    const hover = hoverId != null && (e.source === hoverId || e.target === hoverId);
-    const cls = [on ? "ce-hl" : selectedId ? "ce-dim" : "", hover ? "ce-hover" : ""].join(" ").trim();
-    return cls || on ? { ...e, className: cls, animated: on && !reduced, zIndex: on ? 2 : hover ? 1 : 0 } : e;
-  }), [edges, selectedId, hoverId, reduced]);
+  /* ───── Đường nối hiển thị (cây + link) và làm mờ node không liên quan ───── */
+  const viewEdges = useMemo(() => buildViewEdges(nodes, edges, { dir, selectedId, hoverId, showCross }), [nodes, edges, dir, selectedId, hoverId, showCross]);
+  const kidsCount = useMemo(() => {
+    const m = new Map<string, number>();
+    nodes.forEach((n) => { const p = n.data.node.parentId; if (p) m.set(p, (m.get(p) ?? 0) + 1); });
+    return m;
+  }, [nodes]);
   const viewNodes = useMemo(() => {
-    if (!selectedId) return nodes;
-    const near = new Set([selectedId]);
-    edges.forEach((e) => { if (e.source === selectedId) near.add(e.target); if (e.target === selectedId) near.add(e.source); });
-    return nodes.map((n) => (near.has(n.id) ? n : { ...n, className: "ce-dim" }));
-  }, [nodes, edges, selectedId]);
+    const near = new Set<string>();
+    if (selectedId) {
+      near.add(selectedId);
+      viewEdges.forEach((e) => { if (e.source === selectedId) near.add(e.target); if (e.target === selectedId) near.add(e.source); });
+    }
+    return nodes.map((n) => {
+      const kids = kidsCount.get(n.id) ?? 0;
+      const dim = selectedId != null && !near.has(n.id);
+      const sameKids = (n.data.kids ?? 0) === kids;
+      if (!dim && !n.className && sameKids) return n;
+      return { ...n, className: dim ? "ce-dim" : undefined, data: sameKids ? n.data : { ...n.data, kids } };
+    });
+  }, [nodes, viewEdges, selectedId, kidsCount]);
+  const crossCount = useMemo(() => buildViewEdges(nodes, edges, { dir, selectedId: null, hoverId: null, showCross: true }).filter((e) => e.type === "cross").length, [nodes, edges, dir]);
+  const missingCount = useMemo(() => viewEdges.filter((e) => e.type === "tree" && String(e.className).includes("ce-missing")).length, [viewEdges]);
 
   const titleOf = (id: string) => nodes.find((n) => n.id === id)?.data.node.title ?? id;
   const selectedEdges = selected ? edges.filter((e) => e.source === selected.id || e.target === selected.id) : [];
@@ -254,6 +287,16 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
             <Button size="s" variant="secondary" className={s.tap} iconLeft={<Plus size={14} aria-hidden />} onClick={() => addNode("cluster", "pillar")}>Thêm cluster</Button>
             <Button size="s" variant="ghost" className={s.tap} iconLeft={<Plus size={14} aria-hidden />} onClick={() => selected && addNode("supporting", selected.kind === "supporting" ? (selected.parentId ?? "pillar") : selected.id)} disabled={!selected || selected.kind === "pillar"} title={!selected || selected.kind === "pillar" ? "Chọn một node cluster trước" : undefined}>Thêm supporting</Button>
             <span className={s.spacer} />
+            <div className={s.segToggle} role="group" aria-label="Hướng sơ đồ">
+              <button type="button" className={s.segBtn} aria-pressed={dir === "LR"} onClick={() => changeDir("LR")} title="Cây ngang: pillar bên trái">Ngang</button>
+              <button type="button" className={s.segBtn} aria-pressed={dir === "TB"} onClick={() => changeDir("TB")} title="Cây dọc: pillar trên cùng">Dọc</button>
+            </div>
+            <button type="button" className={[s.toolBtn, s.toolLabel].join(" ")} onClick={() => relayout()} title="Sắp xếp gọn lại (L)"><LayoutGrid size={14} aria-hidden /><span>Sắp xếp</span></button>
+            {crossCount > 0 && (
+              <button type="button" className={[s.toolBtn, s.toolLabel].join(" ")} aria-pressed={showCross} onClick={() => setShowCross((v) => !v)} title={showCross ? "Ẩn liên kết chéo (vẫn hiện khi chọn node)" : "Hiện liên kết chéo"}>
+                <Spline size={14} aria-hidden /><span>Liên kết chéo · {crossCount}</span>
+              </button>
+            )}
             <div className={s.viewTools}>
               <button type="button" className={s.toolBtn} onClick={() => void rf.zoomOut({ duration: dur(200) })} aria-label="Thu nhỏ" title="Thu nhỏ"><Minus size={15} /></button>
               <button type="button" className={s.toolBtn} onClick={() => void rf.zoomIn({ duration: dur(200) })} aria-label="Phóng to" title="Phóng to"><Plus size={15} /></button>
@@ -263,26 +306,31 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
             </div>
           </div>
           <div className={s.flow} ref={flowWrap}>
-            <ReactFlow<TopicNodeType, Edge>
+            <EdgeMarkers />
+            <ReactFlow<TopicNodeType, ViewEdge>
               onMoveStart={(e) => { if (e) userMoved.current = true; }}
-              nodes={viewNodes} edges={viewEdges} nodeTypes={nodeTypes}
+              nodes={viewNodes} edges={viewEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
+              connectionLineType={ConnectionLineType.SmoothStep} connectionRadius={36} elevateEdgesOnSelect={false}
               onNodesChange={(c) => { onNodesChange(c); if (c.some((x) => x.type === "position" && x.dragging === false)) markDirty(); }}
-              onEdgesChange={onEdgesChange} onConnect={onConnect} onNodeClick={onNodeClick} onNodeMouseEnter={onNodeEnter} onNodeMouseLeave={onNodeLeave}
-              onPaneClick={() => setSelectedId(null)} deleteKeyCode={null} fitView fitViewOptions={{ padding: 0.15, maxZoom: 1 }}
+              onConnect={onConnect} onNodeClick={onNodeClick} onNodeMouseEnter={onNodeEnter} onNodeMouseLeave={onNodeLeave}
+              onPaneClick={() => setSelectedId(null)} deleteKeyCode={null} fitView fitViewOptions={{ padding: 0.12, maxZoom: 1 }}
               colorMode="dark" minZoom={0.2} maxZoom={1.8} proOptions={{ hideAttribution: true }}
             >
               <Background gap={24} size={1} color="rgba(255,255,255,0.06)" /> {/* lint-allow-color: React Flow nhận chuỗi màu */}
               <MiniMap className={s.minimap} pannable zoomable style={{ width: 140, height: 100 }} /* lint-allow-color */ nodeColor={(n) => ((n as TopicNodeType).data?.node?.kind === "pillar" ? "#FFEA00" : "#82878E")} maskColor="rgba(3,3,4,0.6)" />
-              <FlowPanel position="bottom-left" className={s.legend}>
-                <span><i className={s.lgPillar} />Pillar</span><span><i className={s.lgCluster} />Cluster</span><span><i className={s.lgSupport} />Supporting</span>
-                <span className={s.legendHint}><Link2 size={12} aria-hidden /> kéo từ chấm dưới sang node khác để tạo link · <kbd>F</kbd> vừa khung · <kbd>Del</kbd> xoá · <kbd>Esc</kbd> bỏ chọn</span>
-              </FlowPanel>
             </ReactFlow>
             {selected && !wide && (
               <button type="button" className={s.editPill} onClick={() => asideRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" })}>
                 <span className={s.editPillText}>Sửa: {selected.title}</span><ArrowDown size={14} aria-hidden />
               </button>
             )}
+          </div>
+          <div className={s.legend} aria-label="Chú giải sơ đồ">
+            <span><i className={s.lgPillar} />Pillar</span><span><i className={s.lgCluster} />Cluster</span><span><i className={s.lgSupport} />Supporting</span>
+            <span><span className={s.lgLine} />Có link</span>
+            {missingCount > 0 && <span><span className={[s.lgLine, s.lgMissing].join(" ")} />Chưa link · {missingCount}</span>}
+            {crossCount > 0 && <span><span className={[s.lgLine, s.lgCross].join(" ")} />Liên kết chéo</span>}
+            <span className={s.legendHint}><Link2 size={12} aria-hidden /> kéo từ chấm {dir === "LR" ? "phải" : "dưới"} của node sang node khác để tạo link · <kbd>F</kbd> vừa khung · <kbd>L</kbd> sắp xếp · <kbd>Del</kbd> xoá · <kbd>Esc</kbd> bỏ chọn</span>
           </div>
         </div>
 

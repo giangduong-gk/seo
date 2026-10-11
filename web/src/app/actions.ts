@@ -146,12 +146,12 @@ export async function createCluster(_prev: ActionState, form: FormData): Promise
 
 /** Lưu bản đồ đã chỉnh (node, link, vị trí) từ editor. */
 export async function saveClusterMap(clusterId: string, data: StoredClusterMap): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { positions, ...rest } = data;
+  const { positions, layout, ...rest } = data;
   const parsed = ClusterMap.safeParse(rest);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Dữ liệu không hợp lệ" };
   const c = await prisma.cluster.findUnique({ where: { id: clusterId } });
   if (!c) return { ok: false, error: "Không tìm thấy cluster" };
-  const stored: StoredClusterMap = { ...parsed.data, positions };
+  const stored: StoredClusterMap = { ...parsed.data, positions, layout: layout === "TB" ? "TB" : layout === "LR" ? "LR" : undefined };
   await prisma.cluster.update({ where: { id: clusterId }, data: { title: parsed.data.pillarTitle, pillarKeyword: parsed.data.pillarKeyword, data: JSON.stringify(stored) } });
   revalidatePath(`/projects/${c.projectId}/clusters/${clusterId}`);
   return { ok: true };

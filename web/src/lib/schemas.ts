@@ -112,7 +112,7 @@ export const ClusterMap = z.object({
 export type ClusterMap = z.infer<typeof ClusterMap>;
 
 /** Dữ liệu lưu DB: map + vị trí node người dùng đã kéo. */
-export type StoredClusterMap = ClusterMap & { positions?: Record<string, { x: number; y: number }> };
+export type StoredClusterMap = ClusterMap & { positions?: Record<string, { x: number; y: number }>; layout?: "LR" | "TB" };
 
 /* ───────────── Sprint 2: Content Brief ─────────────
    Lưu ý: structured output có giới hạn kích thước grammar — giữ schema phẳng, tránh nullable/union lồng nhau. */
