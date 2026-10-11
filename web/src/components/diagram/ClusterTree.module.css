@@ -1,0 +1,190 @@
+/* Sơ đồ pillar → cluster tĩnh. Ngôn ngữ nối dây dùng chung với editor cluster:
+   cây = đường vuông góc bo 12px, 1.5px, --line-3 · link có thật = liền --fg-4 + mũi tên --fg-3 · link nên thêm = đứt --line-3
+   · link chéo = cong, đứt --chart-2 ~60% · hover/focus = --volt. Mọi đường bắt đầu/kết thúc đúng mép hộp. */
+
+.wrap { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+
+.tree {
+  /* Hình học (px nguyên). --ct-h / --ct-gap phải khớp CARD_H / ROW_GAP trong ClusterTree.tsx */
+  --ct-h: 94px;
+  --ct-gap: 10px;
+  --ct-r: 12px;       /* bán kính khuỷu */
+  --ct-lw: 1.5px;     /* nét */
+  --ct-x: 16px;       /* vị trí trục dọc tính từ mép trái danh sách */
+  --ct-l: 32px;       /* chiều dài nhánh: trục → mép thẻ */
+  --ct-vgap: 20px;    /* pillar → thẻ đầu (điện thoại) */
+  --ct-arrow-w: 6px;
+  --ct-arrow-h: 8px;
+  --ct-trunk: var(--line-3);
+  display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0;
+}
+
+/* ───────── Pillar ───────── */
+.pillar {
+  position: relative; z-index: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+  padding: 14px 16px; background: var(--bg-3); border: 1px solid var(--line-3); border-radius: var(--radius-m);
+}
+.pillarLabel { display: inline-flex; align-items: center; gap: 6px; font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--fg-3); }
+.pillarTitle {
+  font: 600 15px/22px var(--font-body); color: var(--fg-1); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
+}
+.pillarFoot { font: var(--text-caption); color: var(--text-muted); }
+.pillarFoot .mono { font: var(--text-mono); color: var(--fg-2); font-variant-numeric: tabular-nums; }
+
+.stub { display: none; }
+
+/* ───────── Danh sách thẻ + trục dọc ───────── */
+.rows { position: relative; display: grid; grid-auto-rows: var(--ct-h); row-gap: var(--ct-gap); margin-top: var(--ct-vgap); min-width: 0; }
+/* Trục: điện thoại → từ mép dưới pillar tới điểm bắt đầu khuỷu └ của thẻ cuối (tâm thẻ cuối − r) */
+.rows::before {
+  content: ""; position: absolute; left: var(--ct-x); width: 0;
+  top: calc(-1 * var(--ct-vgap));
+  bottom: calc(var(--ct-h) / 2 - var(--ct-lw) / 2 + var(--ct-r));
+  border-left: var(--ct-lw) solid var(--ct-trunk);
+}
+
+.row { position: relative; min-width: 0; padding-left: calc(var(--ct-x) + var(--ct-l)); }
+
+/* Nhánh: một hộp vẽ cả khuỷu bo + đoạn ngang tới mép thẻ. Mặc định └ (đường ngang ở đáy hộp, đáy hộp = tâm thẻ + nét/2). */
+.branch {
+  --ct-c: var(--line-3);
+  --ct-arrow: var(--fg-3);
+  position: absolute; left: var(--ct-x); width: var(--ct-l); height: var(--ct-r);
+  top: calc(var(--ct-h) / 2 + var(--ct-lw) / 2 - var(--ct-r));
+  border: 0 dashed var(--ct-c);
+  border-left-width: var(--ct-lw); border-bottom-width: var(--ct-lw);
+  border-bottom-left-radius: var(--ct-r);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.row[data-link="out"] .branch, .row[data-link="in"] .branch, .row[data-link="both"] .branch { --ct-c: var(--fg-4); border-style: solid; }
+
+/* Mũi tên: ::after ở đầu thẻ (pillar → bài), ::before ở cuối khuỷu (bài → pillar). Tâm mũi tên = tâm nét. */
+.branch::before, .branch::after {
+  content: none; position: absolute; width: var(--ct-arrow-w); height: var(--ct-arrow-h); background: var(--ct-arrow);
+  bottom: calc(var(--ct-arrow-h) / -2 - var(--ct-lw) / 2);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.branch::after { right: 0; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.branch::before { left: calc(var(--ct-r) - var(--ct-lw)); clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+.row[data-link="out"] .branch::after, .row[data-link="both"] .branch::after,
+.row[data-link="in"] .branch::before, .row[data-link="both"] .branch::before { content: ""; }
+
+/* Hover / focus thẻ → nhánh của nó sáng volt */
+.row:is(:hover, :focus-within) .branch { --ct-c: var(--volt); --ct-arrow: var(--volt); }
+
+/* ───────── Thẻ cluster: chiều cao cố định, nội dung giữa theo chiều dọc ───────── */
+.card {
+  height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 8px; min-width: 0;
+  padding: 0 14px; background: var(--bg-1); border: 1px solid var(--line-2); border-radius: var(--radius-m);
+  outline: none; transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.row:hover .card { border-color: var(--line-3); }
+.card:focus-visible { border-color: var(--volt); box-shadow: var(--focus-ring); }
+.cardTitle {
+  font: 600 14px/20px var(--font-body); color: var(--fg-1); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+.cardMeta { display: flex; align-items: center; gap: 8px; height: 20px; min-width: 0; }
+.kw { flex: 0 1 auto; min-width: 0; font: var(--text-mono); color: var(--fg-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge { flex: none; display: inline-flex; max-width: 60%; }
+.both {
+  flex: none; display: inline-grid; place-items: center; height: var(--badge-h); padding: 0 5px;
+  border: 1px solid var(--line-2); border-radius: var(--radius-xs); font: 500 11px/1 var(--font-mono); color: var(--fg-2);
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.row:is(:hover, :focus-within) .both { color: var(--volt); border-color: var(--volt); }
+
+/* Link chéo: SVG trong hàng nguồn, mép trái SVG = mép phải thẻ; chỉ hiện từ 900px */
+.arcs { display: none; position: absolute; top: 0; right: 0; overflow: visible; pointer-events: none; }
+.arc { color: var(--chart-2); opacity: 0.6; transition: opacity var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.arcLine { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-dasharray: 4 3; stroke-linecap: butt; }
+.arcHead { fill: currentColor; }
+.row:is(:hover, :focus-within) .arc { color: var(--volt); opacity: 1; }
+
+/* ───────── ≥ 900px: pillar trái — móc nối — cột thẻ phải ───────── */
+@media (min-width: 900px) {
+  .tree {
+    --ct-x: 0px;
+    --ct-l: 44px;
+    grid-template-columns: minmax(200px, 260px) 28px minmax(0, 1fr);
+    align-items: center;
+  }
+  .pillar { grid-column: 1; }
+  .pillarTitle { -webkit-line-clamp: 4; line-clamp: 4; }
+  /* Đoạn nối pillar → trục: chạy giữa hàng lưới (= tâm pillar = tâm cột thẻ), phủ thêm 1 nét để hoà vào trục */
+  .stub { display: block; grid-column: 2; align-self: stretch; position: relative; }
+  .stub::before {
+    content: ""; position: absolute; left: 0; right: calc(-1 * var(--ct-lw)); height: 0;
+    top: calc(50% - var(--ct-lw) / 2); border-top: var(--ct-lw) solid var(--ct-trunk);
+  }
+  .rows { grid-column: 3; margin-top: 0; }
+  /* Trục: từ tâm thẻ đầu + r tới tâm thẻ cuối − r (hai đầu do khuỷu ┌ / └ đảm nhận) */
+  .rows::before { top: calc(var(--ct-h) / 2 - var(--ct-lw) / 2 + var(--ct-r)); }
+  .rows[data-single]::before { display: none; }
+  .row { padding-right: var(--ct-arcs-w, 0px); }
+
+  /* Phía trên tâm: ┌ (đường ngang ở đỉnh hộp, đỉnh hộp = tâm thẻ − nét/2) */
+  .row[data-pos="up"] .branch {
+    top: calc(var(--ct-h) / 2 - var(--ct-lw) / 2);
+    border-bottom-width: 0; border-top-width: var(--ct-lw);
+    border-radius: var(--ct-r) 0 0 0;
+  }
+  .row[data-pos="up"] .branch::before, .row[data-pos="up"] .branch::after { bottom: auto; top: calc(var(--ct-arrow-h) / -2 - var(--ct-lw) / 2); }
+  /* Đúng tâm (số thẻ lẻ): nhánh thẳng nối tiếp đoạn từ pillar */
+  .row[data-pos="mid"] .branch {
+    top: calc(var(--ct-h) / 2 - var(--ct-lw) / 2); height: var(--ct-lw);
+    border-left-width: 0; border-bottom-width: 0; border-top-width: var(--ct-lw); border-radius: 0;
+  }
+  .row[data-pos="mid"] .branch::before, .row[data-pos="mid"] .branch::after { bottom: auto; top: calc(var(--ct-arrow-h) / -2 - var(--ct-lw) / 2); }
+  .row[data-pos="mid"] .branch::before { left: var(--ct-r); }
+
+  .arcs { display: block; }
+}
+
+/* ───────── Chú giải ───────── */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font: var(--text-caption); color: var(--text-muted); }
+.legend > li { display: inline-flex; align-items: center; gap: 8px; }
+.legend svg { flex: none; overflow: visible; }
+.lgSolid { stroke: var(--fg-4); stroke-width: 1.5; fill: none; }
+.lgHead { fill: var(--fg-3); }
+.lgDashed { stroke: var(--line-3); stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
+.lgCross { stroke: var(--chart-2); stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; opacity: 0.6; }
+.lgCrossHead { fill: var(--chart-2); opacity: 0.6; }
+.onlyWide { display: none; }
+@media (min-width: 900px) { .legend > li.onlyWide { display: inline-flex; } }
+
+/* ───────── Danh sách internal link: cột thẳng hàng từ 900px ───────── */
+.links { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; padding-top: var(--space-4); border-top: 1px solid var(--line-1); }
+.linksHead { font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--text-muted); }
+.linksHead .mono { font: var(--text-mono); font-size: 11px; }
+.linkList { display: grid; min-width: 0; }
+/* Điện thoại: nguồn ở dòng 1; dòng 2 = mũi tên + đích; anchor thụt dưới đích */
+.link {
+  display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 8px; row-gap: 4px; align-items: center;
+  padding: 10px 0; min-width: 0; font: var(--text-body-s); color: var(--fg-2);
+}
+.link + .link { border-top: 1px solid var(--line-1); }
+.from { grid-column: 1 / -1; color: var(--fg-1); font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.glyph { grid-column: 1; }
+.to { grid-column: 2; color: var(--fg-1); font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.anchorCell { grid-column: 2; min-width: 0; }
+.from[data-pillar], .to[data-pillar] { color: var(--fg-2); }
+.anchor { display: inline; font: var(--text-mono); color: var(--fg-2); background: var(--state-2); border-radius: var(--radius-xs); padding: 1px 6px; overflow-wrap: anywhere; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+.glyph { display: block; overflow: visible; }
+.glyphLine { fill: none; stroke-width: 1.5; stroke: var(--fg-4); }
+.glyphHead { fill: var(--fg-3); }
+.glyph[data-kind="cross"] .glyphLine { stroke: var(--chart-2); stroke-dasharray: 4 3; opacity: 0.6; }
+.glyph[data-kind="cross"] .glyphHead { fill: var(--chart-2); opacity: 0.6; }
+.glyph[data-kind="unknown"] .glyphLine { stroke: var(--line-3); stroke-dasharray: 4 3; }
+.glyph[data-kind="unknown"] .glyphHead { fill: var(--line-3); }
+
+@media (min-width: 900px) {
+  .linkList { grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr) minmax(0, 1.25fr); column-gap: 12px; }
+  .link { grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; }
+  .from { grid-column: 1; }
+  .glyph { grid-column: 2; align-self: center; }
+  .to { grid-column: 3; }
+  .anchorCell { grid-column: 4; }
+}

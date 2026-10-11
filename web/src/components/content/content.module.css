@@ -137,24 +137,61 @@
 .research { margin: 0; max-height: 480px; overflow: auto; padding: 16px; background: var(--bg-1); border: 1px solid var(--line-1); border-radius: var(--radius-m); font: var(--text-body-s); color: var(--fg-2); white-space: pre-wrap; overflow-wrap: anywhere; }
 .disclosureSummary { min-height: var(--tap-min); font: var(--text-body-s); color: var(--fg-2); }
 
-/* ───────── Outline dạng timeline ───────── */
-.timeline { position: relative; display: grid; gap: 0; }
-.timeline::before { content: ""; position: absolute; left: 7px; top: 10px; bottom: 10px; width: 1px; background: var(--line-2); }
-.node { position: relative; padding: 0 0 18px 30px; min-width: 0; }
+/* ───────── Outline dạng timeline ─────────
+   Một trục dọc liền (1.5px, --line-3) xuyên qua marker H1/H2; H3 treo khỏi trục bằng khuỷu bo ngắn.
+   Tâm marker = tâm dòng đầu của heading = line-height / 2 (--tl-lh khai báo theo cấp, heading dùng đúng line-height đó).
+   Trục vẽ theo từng mục (li::after): mục đầu bắt đầu ở tâm marker, mục cuối dừng ở tâm marker → không có "đuôi".
+   Các đoạn nối tiếp nhau đúng mép li (gap 0) nên trục liền mạch dù heading xuống nhiều dòng. */
+.timeline {
+  --tl-lw: 1.5px;
+  --tl-x: 8px;        /* tâm trục */
+  --tl-r: 12px;       /* bán kính khuỷu H3 */
+  --tl-pad: 28px;     /* lề chữ H1/H2 */
+  --tl-x3: 28px;      /* tâm marker H3 */
+  --tl-pad3: 44px;    /* lề chữ H3 */
+  position: relative; display: grid; gap: 0;
+}
+.node { --tl-lh: 22px; --tl-dot: 10px; position: relative; padding: 0 0 18px var(--tl-pad); min-width: 0; }
+.node[data-level="1"] { --tl-lh: 24px; --tl-dot: 14px; }
+.node[data-level="3"], .node[data-level="4"], .node[data-level="5"], .node[data-level="6"] { --tl-dot: 8px; padding-left: var(--tl-pad3); }
 .node:last-child { padding-bottom: 0; }
-.node::before { content: ""; position: absolute; left: 3px; top: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--surface-card); border: 1.5px solid var(--fg-3); }
-.node[data-level="1"]::before { left: 1px; top: 5px; width: 13px; height: 13px; background: var(--volt); border-color: var(--volt); box-shadow: 0 0 0 4px var(--volt-soft); }
+/* Marker: tâm ngang = trục (H3: --tl-x3), tâm dọc = line-height / 2 */
+.node::before {
+  content: ""; position: absolute; z-index: 1; box-sizing: border-box;
+  left: calc(var(--tl-x) - var(--tl-dot) / 2); top: calc(var(--tl-lh) / 2 - var(--tl-dot) / 2);
+  width: var(--tl-dot); height: var(--tl-dot); border-radius: 50%;
+  background: var(--surface-card); border: var(--tl-lw) solid var(--fg-3);
+}
+.node[data-level="1"]::before { background: var(--volt); border-color: var(--volt); box-shadow: 0 0 0 4px var(--volt-soft); }
 .node[data-level="2"]::before { border-color: var(--fg-2); }
-.node[data-level="3"] { padding-left: 50px; }
-.node[data-level="3"]::before { left: 4px; width: 7px; height: 7px; top: 7px; border-color: var(--fg-4); }
-@media (min-width: 600px) { .node[data-level="3"] { padding-left: 58px; } }
-.nodeHead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
-.level { font: var(--text-mono); font-size: 11px; color: var(--fg-3); flex: none; }
+.node:not([data-level="1"]):not([data-level="2"])::before { left: calc(var(--tl-x3) - var(--tl-dot) / 2); border-color: var(--fg-4); }
+/* Đoạn trục của mục: mặc định cả chiều cao li */
+.node::after {
+  content: ""; position: absolute; z-index: 0; top: 0; bottom: 0; width: 0;
+  left: calc(var(--tl-x) - var(--tl-lw) / 2); border-left: var(--tl-lw) solid var(--line-3);
+}
+.node:first-child::after { top: calc(var(--tl-lh) / 2); }
+.node:last-child::after { bottom: auto; height: calc(var(--tl-lh) / 2); }
+.node:only-child::after { content: none; }
+/* H3 cuối: trục của mục trước đã chạm mép trên li này, khuỷu nhận tiếp → không vẽ thêm */
+.node:last-child:not([data-level="1"]):not([data-level="2"])::after { content: none; }
+/* Khuỷu H3: từ trục cong xuống rồi ngang tới mép trái marker; đáy khuỷu = tâm dòng đầu + nét/2, đỉnh khuỷu ≤ mép trên li */
+.node:not([data-level="1"]):not([data-level="2"]) > .nodeHead::before {
+  content: ""; position: absolute; box-sizing: border-box;
+  left: calc(var(--tl-x) - var(--tl-lw) / 2);
+  width: calc(var(--tl-x3) - var(--tl-dot) / 2 - var(--tl-x) + var(--tl-lw) / 2);
+  top: calc(var(--tl-lh) / 2 + var(--tl-lw) / 2 - var(--tl-r)); height: var(--tl-r);
+  border: 0 solid var(--line-3); border-left-width: var(--tl-lw); border-bottom-width: var(--tl-lw);
+  border-bottom-left-radius: var(--tl-r);
+}
+.node:last-child:not([data-level="1"]):not([data-level="2"]) > .nodeHead::before { top: 0; height: calc(var(--tl-lh) / 2 + var(--tl-lw) / 2); }
+.nodeHead { display: flex; align-items: baseline; gap: 4px 10px; min-width: 0; }
+.level { font: var(--text-mono); font-size: 11px; line-height: var(--tl-lh); color: var(--fg-3); flex: none; }
 .node[data-level="1"] .level { color: var(--volt); }
-.heading { font: 600 15px/1.4 var(--font-body); color: var(--fg-1); min-width: 0; overflow-wrap: anywhere; flex: 1 1 260px; }
-.node[data-level="1"] .heading { font: var(--text-h3); }
+.heading { font: 600 15px/1.4 var(--font-body); line-height: var(--tl-lh); color: var(--fg-1); min-width: 0; overflow-wrap: anywhere; flex: 1 1 0; }
+.node[data-level="1"] .heading { font: var(--text-h3); line-height: var(--tl-lh); }
 .node[data-level="3"] .heading { font-weight: 500; color: var(--fg-2); }
-.words { font: var(--text-mono); color: var(--text-muted); flex: none; }
+.words { font: var(--text-mono); line-height: var(--tl-lh); color: var(--text-muted); flex: none; margin-left: auto; white-space: nowrap; }
 .nodeBody { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; max-width: var(--measure); }
 .answer { padding: 10px 12px; background: var(--volt-soft); border-left: 2px solid var(--volt); border-radius: 0 var(--radius-s) var(--radius-s) 0; font: var(--text-body-s); color: var(--fg-1); }
 .answerLabel { display: block; font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--volt); margin-bottom: 4px; }

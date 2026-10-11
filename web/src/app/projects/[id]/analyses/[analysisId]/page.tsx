@@ -1,4 +1,4 @@
-import { ArrowRight, CircleCheck, CircleHelp, ExternalLink, Globe, Link2, Network, Tags } from "lucide-react";
+import { ArrowRight, CircleCheck, CircleHelp, ExternalLink, Globe, Network } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Chip, Panel, SystemNotice, Table, type BadgeTone } from "@/components/ui";
@@ -6,6 +6,7 @@ import { ClampText } from "@/components/content/ClampText";
 import { CopyChips } from "@/components/content/CopyChips";
 import { CopyText } from "@/components/content/CopyText";
 import { DetailLayout } from "@/components/content/DetailLayout";
+import { ClusterTree } from "@/components/diagram/ClusterTree";
 import { KpiTile, Meter, StepMeter } from "@/components/content/KpiTile";
 import { RichText } from "@/components/content/RichText";
 import { TimeAgo } from "@/components/content/time";
@@ -212,33 +213,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
 
         <Panel id="cluster" title="Gợi ý Topic Cluster" sub={`${r.cluster.clusters.length} bài`} className="reveal"
           action={<Link href={`/projects/${a.projectId}/clusters`} className="caption tap-link" style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--fg-2)" }}>Xây cluster <ArrowRight size={14} aria-hidden /></Link>}>
-          <div>
-            <div className={c.groupLabel}>Pillar</div>
-            <div style={{ fontWeight: 600, maxWidth: "var(--measure)" }}>{r.cluster.pillar}</div>
-          </div>
-          <div className={c.split}>
-            <div style={{ minWidth: 0 }}>
-              <div className={c.groupLabel}>Bài cluster · {r.cluster.clusters.length}</div>
-              <ul className={c.plan}>
-                {r.cluster.clusters.map((x) => (
-                  <li key={x.title + x.targetKeyword}>
-                    <span style={{ fontWeight: 500, maxWidth: "var(--measure)" }}>{x.title}</span>
-                    <span className={c.cardMeta}><span className="caption mono" style={{ overflowWrap: "anywhere" }}>{x.targetKeyword}</span><IntentBadge intent={x.intent} /></span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          {r.cluster.internalLinks.length > 0 && (
-            <div style={{ minWidth: 0 }}>
-              <div className={c.groupLabel}><Link2 size={12} aria-hidden style={{ verticalAlign: "-1px" }} /> Internal link đề xuất · {r.cluster.internalLinks.length}</div>
-              <ul style={{ display: "grid", gap: 10 }}>
-                {r.cluster.internalLinks.map((l, i) => (
-                  <li key={i} className={c.linkRow}><b>{l.from}</b><ArrowRight size={12} aria-hidden /><b>{l.to}</b><span className={c.anchor}>“{l.anchor}”</span></li>
-                ))}
-              </ul>
-            </div>
-          )}
-          </div>
+          <ClusterTree cluster={r.cluster} badge={(intent) => <IntentBadge intent={intent} />} />
         </Panel>
 
         <Panel id="checklist" title="Checklist GEO / E-E-A-T" sub={`${r.geoChecklist.length}`} className="reveal">

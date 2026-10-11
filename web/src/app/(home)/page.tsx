@@ -61,7 +61,7 @@ export default async function HomePage() {
       {projects.length < 2 && (
         <section aria-labelledby="cach-dung" className={s.steps}>
           <h2 id="cach-dung" className="micro">Cách dùng</h2>
-          <ol className={[s.stepList, "stagger"].join(" ")}>
+          <ol className={[s.stepList, "page-in"].join(" ")}>
             {STEPS.map(({ icon: Icon, title, text }, i) => (
               <li key={title} className={s.step}>
                 <span className={s.stepNum} aria-hidden>{i + 1}</span>
