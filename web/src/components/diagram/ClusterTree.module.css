@@ -24,12 +24,12 @@
   position: relative; z-index: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;
   padding: 14px 16px; background: var(--bg-3); border: 1px solid var(--line-3); border-radius: var(--radius-m);
 }
-.pillarLabel { display: inline-flex; align-items: center; gap: 6px; font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--fg-3); }
+.pillarLabel { display: inline-flex; align-items: center; gap: 6px; font: var(--text-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--fg-2); }
 .pillarTitle {
   font: 600 15px/22px var(--font-body); color: var(--fg-1); overflow-wrap: anywhere;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden;
 }
-.pillarFoot { font: var(--text-caption); color: var(--text-muted); }
+.pillarFoot { font: var(--text-caption); color: var(--fg-2); }
 .pillarFoot .mono { font: var(--text-mono); color: var(--fg-2); font-variant-numeric: tabular-nums; }
 
 .stub { display: none; }
@@ -94,6 +94,12 @@
   transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
 .row:is(:hover, :focus-within) .both { color: var(--volt); border-color: var(--volt); }
+/* Điện thoại: thẻ hẹp → từ khoá một dòng riêng, badge xuống dòng dưới (thẻ cao hơn, vẫn cố định) */
+@media (max-width: 599px) {
+  .tree { --ct-h: 116px; }
+  .cardMeta { flex-wrap: wrap; height: auto; row-gap: 6px; }
+  .kw { flex: 1 0 100%; }
+}
 
 /* Link chéo: SVG trong hàng nguồn, mép trái SVG = mép phải thẻ; chỉ hiện từ 900px */
 .arcs { display: none; position: absolute; top: 0; right: 0; overflow: visible; pointer-events: none; }
@@ -151,7 +157,7 @@
 .lgDashed { stroke: var(--line-3); stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
 .lgCross { stroke: var(--chart-2); stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; opacity: 0.6; }
 .lgCrossHead { fill: var(--chart-2); opacity: 0.6; }
-.onlyWide { display: none; }
+.legend > li.onlyWide { display: none; }
 @media (min-width: 900px) { .legend > li.onlyWide { display: inline-flex; } }
 
 /* ───────── Danh sách internal link: cột thẳng hàng từ 900px ───────── */
@@ -161,16 +167,16 @@
 .linkList { display: grid; min-width: 0; }
 /* Điện thoại: nguồn ở dòng 1; dòng 2 = mũi tên + đích; anchor thụt dưới đích */
 .link {
-  display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 8px; row-gap: 4px; align-items: center;
+  display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 8px; row-gap: 4px; align-items: start;
   padding: 10px 0; min-width: 0; font: var(--text-body-s); color: var(--fg-2);
 }
 .link + .link { border-top: 1px solid var(--line-1); }
 .from { grid-column: 1 / -1; color: var(--fg-1); font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
-.glyph { grid-column: 1; }
+.glyph { grid-column: 1; margin-top: calc((1lh - 8px) / 2); }
 .to { grid-column: 2; color: var(--fg-1); font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
 .anchorCell { grid-column: 2; min-width: 0; }
 .from[data-pillar], .to[data-pillar] { color: var(--fg-2); }
-.anchor { display: inline; font: var(--text-mono); color: var(--fg-2); background: var(--state-2); border-radius: var(--radius-xs); padding: 1px 6px; overflow-wrap: anywhere; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.anchor { display: inline-block; max-width: 100%; vertical-align: top; font: var(--text-mono); color: var(--fg-2); background: var(--state-2); border-radius: var(--radius-xs); padding: 1px 6px; overflow-wrap: anywhere; }
 
 .glyph { display: block; overflow: visible; }
 .glyphLine { fill: none; stroke-width: 1.5; stroke: var(--fg-4); }
@@ -181,10 +187,11 @@
 .glyph[data-kind="unknown"] .glyphHead { fill: var(--line-3); }
 
 @media (min-width: 900px) {
-  .linkList { grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr) minmax(0, 1.25fr); column-gap: 12px; }
-  .link { grid-column: 1 / -1; grid-template-columns: subgrid; align-items: baseline; }
+  .linkList { grid-template-columns: minmax(0, 0.85fr) 24px minmax(0, 1fr) minmax(0, 1.4fr); column-gap: 12px; }
+  .link { grid-column: 1 / -1; grid-template-columns: subgrid; align-items: start; }
   .from { grid-column: 1; }
-  .glyph { grid-column: 2; align-self: center; }
+  /* mũi tên giữa dòng chữ đầu: (1lh − cao mũi tên) / 2 */
+  .glyph { grid-column: 2; margin-top: calc((1lh - 8px) / 2); }
   .to { grid-column: 3; }
   .anchorCell { grid-column: 4; }
 }
