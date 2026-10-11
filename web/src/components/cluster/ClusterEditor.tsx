@@ -96,6 +96,17 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
 
   /* ───── Viewport ───── */
   const fit = useCallback(() => { void rf.fitView({ padding: 0.15, maxZoom: 1, duration: dur(420) }); }, [rf]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Khung canvas đổi kích thước sau khi hydrate (--subnav-h, xoay máy, kéo cửa sổ) → căn lại cho vừa,
+  // trừ khi người dùng đã tự kéo/zoom (onMoveStart có event chỉ khi do người dùng).
+  const flowWrap = useRef<HTMLDivElement>(null);
+  const userMoved = useRef(false);
+  useEffect(() => {
+    const el = flowWrap.current; if (!el || typeof ResizeObserver === "undefined") return;
+    let raf = 0;
+    const ro = new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (!userMoved.current) void rf.fitView({ padding: 0.15, maxZoom: 1 }); }); });
+    ro.observe(el);
+    return () => { ro.disconnect(); cancelAnimationFrame(raf); };
+  }, [rf]);
   const focusNode = useCallback((id: string | null) => {
     if (!id) return;
     const n = rf.getNode(id);
@@ -251,8 +262,9 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
               <button type="button" className={[s.toolBtn, s.toolLabel].join(" ")} onClick={() => focusNode(selectedId)} disabled={!selectedId} title="Tới node đang chọn"><Crosshair size={14} aria-hidden /><span>Tới node</span></button>
             </div>
           </div>
-          <div className={s.flow}>
+          <div className={s.flow} ref={flowWrap}>
             <ReactFlow<TopicNodeType, Edge>
+              onMoveStart={(e) => { if (e) userMoved.current = true; }}
               nodes={viewNodes} edges={viewEdges} nodeTypes={nodeTypes}
               onNodesChange={(c) => { onNodesChange(c); if (c.some((x) => x.type === "position" && x.dragging === false)) markDirty(); }}
               onEdgesChange={onEdgesChange} onConnect={onConnect} onNodeClick={onNodeClick} onNodeMouseEnter={onNodeEnter} onNodeMouseLeave={onNodeLeave}

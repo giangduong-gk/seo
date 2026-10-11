@@ -14,6 +14,7 @@ import { prisma } from "@/lib/db";
 import { KeywordAnalysis } from "@/lib/schemas";
 import { INTENT_LABEL, IntentBadge } from "../../IntentBadge";
 import { BriefForm } from "../../briefs/BriefForm";
+import { ProjectHeader } from "../../ProjectHeader";
 import { hasApiKey } from "@/lib/claude";
 
 export const dynamic = "force-dynamic";
@@ -80,18 +81,12 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="container stack page-in">
-      <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/">Dự án</Link>
-        <span className="sep" aria-hidden>/</span>
-        <Link href={`/projects/${a.projectId}`}>{a.project.name}</Link>
-        <span className="sep" aria-hidden>/</span>
-        <span aria-current="page" title={a.keyword.term}>{a.keyword.term}</span>
-      </nav>
+      <ProjectHeader projectId={a.projectId} active="analyses" trail={a.keyword.term} />
 
       <header className={c.head}>
         <div className={c.headText}>
           <div className="micro">Phân tích từ khoá · <TimeAgo date={a.createdAt} /></div>
-          <h1 className="display">{r.keyword}</h1>
+          <h1 className="h1">{r.keyword}</h1>
           <div className={c.headMeta}>
             <IntentBadge intent={r.intent} />
             <Badge tone={web ? "success" : "outline"} title="Nguồn dữ liệu SERP">{web ? "Web research" : "Ước tính model"}</Badge>
