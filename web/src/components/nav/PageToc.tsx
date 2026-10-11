@@ -11,7 +11,7 @@ export type TocItem = { id: string; label: string };
  * Render 2 biến thể: dải chip ngang dính dưới header (< 1200px) và cột dọc sticky (≥ 1200px) — đặt component
  * ở cột bên của layout 2 cột; trên màn nhỏ nó tự hiển thị dạng chip ở đúng vị trí đặt.
  */
-export function PageToc({ items, title = "Trên trang này" }: { items: TocItem[]; title?: string }) {
+export function PageToc({ items, title = "Trên trang này", className, mobileClassName }: { items: TocItem[]; title?: string; className?: string; mobileClassName?: string }) {
   const [active, setActive] = useState(items[0]?.id ?? "");
   const chipRow = useRef<HTMLDivElement>(null);
 
@@ -26,8 +26,16 @@ export function PageToc({ items, title = "Trên trang này" }: { items: TocItem[
       if (first) setActive(first.id);
     }, { rootMargin: "-20% 0px -60% 0px", threshold: [0, 0.01, 0.5] });
     els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    // Cuối trang: các mục cuối không thể cuộn lên đỉnh → chọn mục cuối khi đã chạm đáy
+    const onScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) setActive(items[items.length - 1].id);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { io.disconnect(); window.removeEventListener("scroll", onScroll); };
   }, [items]);
+
+  // Bấm một mục → đánh dấu ngay (kể cả mục cuối không cuộn tới đỉnh được); scrollspy cập nhật lại khi người dùng cuộn tiếp
+  const pick = (id: string) => () => setActive(id);
 
   // giữ chip đang chọn trong tầm nhìn trên mobile
   useEffect(() => {
@@ -38,13 +46,13 @@ export function PageToc({ items, title = "Trên trang này" }: { items: TocItem[
   if (items.length < 2) return null;
   return (
     <>
-      <div ref={chipRow} className={[s.mobile, "scroll-x", "fade-x"].join(" ")} role="navigation" aria-label={title}>
-        {items.map((i) => <a key={i.id} data-id={i.id} href={`#${i.id}`} className={[s.chip, active === i.id ? s.chipActive : ""].join(" ")} aria-current={active === i.id ? "location" : undefined}>{i.label}</a>)}
+      <div ref={chipRow} className={[s.mobile, "scroll-x", "fade-x", mobileClassName ?? ""].join(" ")} role="navigation" aria-label={title}>
+        {items.map((i) => <a key={i.id} data-id={i.id} href={`#${i.id}`} onClick={pick(i.id)} className={[s.chip, active === i.id ? s.chipActive : ""].join(" ")} aria-current={active === i.id ? "location" : undefined}>{i.label}</a>)}
       </div>
-      <nav className={s.desktop} aria-label={title}>
+      <nav className={[s.desktop, className ?? ""].join(" ")} aria-label={title}>
         <div className={s.title}>{title}</div>
         <div className={s.list}>
-          {items.map((i) => <a key={i.id} href={`#${i.id}`} className={[s.link, active === i.id ? s.active : ""].join(" ")} aria-current={active === i.id ? "location" : undefined}>{i.label}</a>)}
+          {items.map((i) => <a key={i.id} href={`#${i.id}`} onClick={pick(i.id)} className={[s.link, active === i.id ? s.active : ""].join(" ")} aria-current={active === i.id ? "location" : undefined}>{i.label}</a>)}
         </div>
       </nav>
     </>
