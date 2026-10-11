@@ -28,6 +28,7 @@ const fmtItem = (it) => {
     if ("sticky" in it) return `sticky \`${it.sticky}\` đè heading "${it.heading}" ${it.overlapPx}px`;
     if ("a" in it && "b" in it) return `\`${it.a}\` chồng \`${it.b}\` ${it.overlapPx}px`;
     if ("cls" in it) return `CLS ${it.cls} (tổng ${it.total}); nguồn: ${(it.sources || []).map((s) => `\`${s.sel}\` ${s.value}`).join(", ") || "?"}`;
+    if ("landmark" in it) return `${it.landmark}: ${it.elements.map((e) => "\`" + e + "\`").join(" + ")}`;
     if ("href" in it) return `${it.href}: top ${it.top} < đáy sticky ${it.stickyBottom}`;
     if ("target" in it && "name" in it) return `${it.name} trên \`${it.target}\` (${it.duration}ms)`;
     if ("sel" in it) return `\`${it.sel}\` "${it.text ?? ""}"`;

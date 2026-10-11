@@ -19,13 +19,15 @@ test.describe("Trang dự án & phân tích", () => {
     await page.getByRole("region", { name: "Lịch sử phân tích" }).getByRole("link").first().click();
     await page.waitForURL(/\/analyses\/[a-z0-9]+$/i);
     await expect(page.getByRole("heading", { level: 1, name: /iphone 17 pro max giá bao nhiêu/i })).toBeVisible();
-    // 4 panel KPI
-    const kpi = page.locator(".grid-kpi");
-    await expect(kpi.getByRole("region", { name: "Khối lượng tìm kiếm" })).toBeVisible();
-    await expect(kpi.getByRole("region", { name: "Độ khó" })).toBeVisible();
-    await expect(kpi.getByRole("region", { name: "Định dạng đề xuất" })).toBeVisible();
-    await expect(kpi.getByRole("region", { name: "Đối tượng" })).toBeVisible();
+    // Hàng KPI "Tổng quan" (4 ô): Ý định · Khối lượng tìm kiếm · Độ khó · Nguồn dữ liệu
+    const kpi = page.getByRole("region", { name: "Tổng quan" });
+    for (const name of ["Ý định", "Khối lượng tìm kiếm", "Độ khó", "Nguồn dữ liệu"]) await expect(kpi.getByRole("region", { name, exact: true })).toBeVisible();
     await expect(kpi.getByRole("region", { name: "Độ khó" }).getByText("62")).toBeVisible();
+    // Định dạng đề xuất + Đối tượng nằm trong panel "Ý định & góc viết"
+    const angle = page.getByRole("region", { name: "Ý định & góc viết" });
+    await expect(angle).toBeVisible();
+    await expect(angle.getByText("Định dạng đề xuất")).toBeVisible();
+    await expect(angle.getByText("Đối tượng", { exact: true })).toBeVisible();
     // Chips
     const chips = page.getByRole("region", { name: "Từ khoá ngữ nghĩa" }).locator('span[class*="chip" i]');
     await expect.poll(() => chips.count()).toBeGreaterThanOrEqual(5);

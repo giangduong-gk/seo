@@ -11,7 +11,9 @@ test.describe("Content Brief", () => {
   test("trang brief: outline answer-first, E-E-A-T, checklist, FAQ, nút tải Markdown", async ({ page }) => {
     await page.goto(`/projects/${DEMO.projectId}/briefs/${DEMO.briefId}`);
     await expect(page.getByRole("heading", { level: 1, name: /Trả góp iPhone 17 Pro Max/i })).toBeVisible();
-    const outline = page.getByRole("region", { name: "Outline" });
+    // Panel outline (section#outline). Tên region "Outline" đang TRÙNG với ô KPI cùng tên — lỗi a11y được bắt riêng
+    // bởi gate "tên landmark duy nhất" trong a11y.spec.ts, nên ở đây định vị panel theo id.
+    const outline = page.locator("section#outline");
     await expect(outline).toBeVisible();
     await expect.poll(() => outline.locator("ol > li").count()).toBeGreaterThanOrEqual(5);
     await expect(outline.getByText("H1", { exact: true }).first()).toBeVisible();

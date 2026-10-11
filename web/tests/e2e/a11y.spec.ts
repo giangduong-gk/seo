@@ -55,3 +55,32 @@ for (const p of UX_PAGES) {
     expect(compact, `Vi phạm axe serious/critical trên ${url} (chi tiết trong attachment axe-*.json)`).toEqual([]);
   });
 }
+
+/**
+ * Tên landmark/region phải duy nhất trên trang (axe `landmark-unique` thuộc nhóm best-practice nên không nằm trong
+ * bộ tag WCAG ở trên): hai `section[aria-label="X"]` cùng tên khiến trình đọc màn hình liệt kê hai vùng giống hệt nhau.
+ */
+for (const p of UX_PAGES) {
+  test(`a11y: tên region/landmark duy nhất — ${p.name}`, async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium", "Cấu trúc landmark giống nhau trên mọi viewport");
+    const { url } = await gotoUx(page, p);
+    await settle(page);
+    const dups = await page.evaluate(() => {
+      const roleOf = (el: Element) => el.getAttribute("role") || ({ SECTION: "region", NAV: "navigation", ASIDE: "complementary", FORM: "form", MAIN: "main", HEADER: "banner", FOOTER: "contentinfo" } as Record<string, string>)[el.tagName] || "";
+      const nameOf = (el: Element) => (el.getAttribute("aria-label") || (el.getAttribute("aria-labelledby") || "").split(/\s+/).map((id) => document.getElementById(id)?.textContent ?? "").join(" ")).trim();
+      const seen = new Map<string, string[]>();
+      for (const el of Array.from(document.querySelectorAll("section[aria-label], section[aria-labelledby], nav[aria-label], aside[aria-label], form[aria-label], [role=region][aria-label], [role=navigation][aria-label], [role=complementary][aria-label]"))) {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        if (cs.display === "none" || cs.visibility === "hidden" || (r.width === 0 && r.height === 0 && el.childElementCount > 0)) continue;
+        const key = `${roleOf(el)}|${nameOf(el)}`;
+        if (!nameOf(el)) continue;
+        const sel = el.tagName.toLowerCase() + (el.id ? `#${el.id}` : "") + Array.from(el.classList).slice(0, 1).map((c) => "." + c).join("") + `[aria-label="${nameOf(el)}"]`;
+        seen.set(key, [...(seen.get(key) ?? []), sel]);
+      }
+      return [...seen.entries()].filter(([, v]) => v.length > 1).map(([k, v]) => ({ landmark: k, elements: v }));
+    });
+    await recordUx(testInfo, { suite: "a11y", page: p.key, pageName: p.name, variant: "landmarks", url, checks: { "unique landmark names": { pass: dups.length === 0, items: dups } } });
+    expect(dups, `landmark trùng tên trên ${url}`).toEqual([]);
+  });
+}
