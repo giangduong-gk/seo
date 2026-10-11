@@ -43,4 +43,4 @@ export function apiKeyNotice(page: Page) {
   return page.getByRole("status").filter({ hasText: "Chưa cấu hình ANTHROPIC_API_KEY" });
 }
 
-export const DEMO = { projectId: "demo-project", clusterId: "demo-cluster", briefId: "demo-brief", projectName: "Điện Thoại Giá Kho" } as const;
+export const DEMO = { projectId: "demo-project", clusterId: "demo-cluster", briefId: "demo-brief", articleId: "demo-article", projectName: "Điện Thoại Giá Kho" } as const;

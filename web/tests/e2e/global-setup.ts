@@ -1,6 +1,9 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
+import { PrismaClient } from "@prisma/client";
 import { E2E_DATABASE_URL } from "../../playwright.config";
+import { GOOD_ARTICLE, GOOD_KEYWORD, GOOD_META, GOOD_SLUG, GOOD_TITLE } from "../unit/fixtures/sample-article";
+import { DEMO } from "./fixtures";
 
 /**
  * Chuẩn bị DB SQLite riêng cho e2e: prisma/test.db (đường dẫn tuyệt đối — xem playwright.config.ts).
@@ -8,6 +11,8 @@ import { E2E_DATABASE_URL } from "../../playwright.config";
  * 2. `reset-db.mjs` — xoá dữ liệu cũ nhưng GIỮ NGUYÊN FILE: Playwright khởi động webServer TRƯỚC globalSetup,
  *    dev server có thể đã mở file; xoá file lúc này sẽ gây "attempt to write a readonly database" (SQLITE_READONLY_DBMOVED).
  * 3. `prisma/seed.mjs` — dữ liệu demo (demo-project / demo-cluster / demo-brief).
+ * 4. Bổ sung cho bộ UX gate: bài viết `demo-article` (nội dung dài từ fixture unit) để có trang editor bài viết,
+ *    và đưa id phân tích seed (cuid ngẫu nhiên) vào `process.env.E2E_ANALYSIS_ID` — worker kế thừa env của globalSetup.
  * Biến môi trường truyền vào process con ghi đè .env (Prisma không override khoá đã có trong process.env).
  */
 export default async function globalSetup() {
@@ -18,4 +23,21 @@ export default async function globalSetup() {
   execFileSync(npx, ["prisma", "db", "push", "--skip-generate", "--accept-data-loss"], opts);
   execFileSync(process.execPath, ["tests/e2e/reset-db.mjs"], opts);
   execFileSync(process.execPath, ["prisma/seed.mjs"], opts);
+
+  // Ảnh trong bài mẫu trỏ /images/… (không có trong public/) → thay bằng SVG data URI để preview không sinh 404 console.error.
+  const pixel = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'/%3E";
+  const body = GOOD_ARTICLE.replace(/\]\(\/images\/[^)]+\)/g, `](${pixel})`);
+  const prisma = new PrismaClient({ datasources: { db: { url: E2E_DATABASE_URL } } });
+  try {
+    await prisma.article.create({
+      data: {
+        id: DEMO.articleId, projectId: DEMO.projectId, briefId: DEMO.briefId, targetKeyword: GOOD_KEYWORD, title: GOOD_TITLE,
+        slug: GOOD_SLUG, metaDescription: GOOD_META, bodyMarkdown: body, status: "review", model: "claude-opus-5-5",
+      },
+    });
+    const analysis = await prisma.analysis.findFirst({ where: { projectId: DEMO.projectId }, select: { id: true } });
+    if (analysis) process.env.E2E_ANALYSIS_ID = analysis.id;
+  } finally {
+    await prisma.$disconnect();
+  }
 }

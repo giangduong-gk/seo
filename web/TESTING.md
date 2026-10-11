@@ -11,11 +11,20 @@ npm ci && npx prisma generate
 npm run typecheck     # tsc --noEmit (bao gồm cả tests/)
 npm test              # Vitest — unit tests trong tests/unit/**
 npm run test:watch    # Vitest watch
-npm run test:e2e      # Playwright — dev server riêng cổng 3500, DB prisma/test.db, KHÔNG có API key
+npm run test:e2e      # Playwright — TẤT CẢ spec (smoke + UX gate); dev server riêng cổng 3500, distDir .next-qa, DB prisma/test.db, KHÔNG có API key
+npm run test:e2e:ux   # chỉ 5 bộ UX gate (a11y · layout · motion · keyboard · visual)
+npm run ux:report     # gộp test-results/ux-report/*.json → bảng Markdown trang × check (stdout; thêm đường dẫn để ghi file)
 npm run lint:tokens   # báo màu hard-code ngoài src/styles/tokens (exit 1 nếu có)
+
+# chạy MỘT bộ / một trang / một project
+npx playwright test tests/e2e/a11y.spec.ts
+npx playwright test tests/e2e/layout.spec.ts -g "1440px"          # một viewport
+npx playwright test tests/e2e/layout.spec.ts -g "Brief" --project=chromium
+npx playwright test tests/e2e/layout.spec.ts --project=phone      # chỉ kiểm tra vùng chạm
+npx playwright show-report                                        # (CI) xem HTML report + ảnh/JSON đính kèm
 ```
 
-CI (`.github/workflows/ci.yml`): Node 22 → `npm ci` → `prisma generate` → `typecheck` → `npm test` → `npm run build` → `lint:tokens` (chỉ báo, `continue-on-error`) → job e2e cài Chromium bằng `npx playwright install --with-deps chromium` rồi `npm run test:e2e`. Khi fail, report/trace được upload làm artifact `playwright-report`.
+CI (`.github/workflows/ci.yml`): Node 22 → `npm ci` → `prisma generate` → `typecheck` → `npm test` → `npm run build` → `lint:tokens` (bắt buộc) → job e2e (timeout 50 phút) `npm ci` (cài cả `@axe-core/playwright` ghim trong lockfile) → cài Chromium bằng `npx playwright install --with-deps chromium` → `npm run test:e2e` (mọi spec, gồm UX gate) → **luôn** chạy `tools/ux-report.mjs` và ghi bảng trang × check vào Job Summary → **luôn** upload `playwright-report` + `test-results` (ảnh baseline `test-results/visual/`, `ux-report/*.json`, trace khi fail).
 
 ## 2. Unit tests (Vitest)
 
@@ -37,8 +46,9 @@ Module Sprint 3 (`scorer.ts`, `jsonld.ts`) được import qua `tests/unit/_help
 ## 3. E2E smoke (Playwright Test)
 
 Cấu hình: `playwright.config.ts`
-- `webServer`: `npm run dev -- -p 3500`, `reuseExistingServer: true`, timeout 180 s, env `DATABASE_URL=file:<abs>/web/prisma/test.db` (hằng `E2E_DATABASE_URL` trong config), `ANTHROPIC_API_KEY=""`.
-- `globalSetup` (`tests/e2e/global-setup.ts`): `prisma db push --skip-generate` (tạo file nếu chưa có) → `tests/e2e/reset-db.mjs` (xoá dữ liệu, **giữ nguyên file**) → `node prisma/seed.mjs` — cùng env.
+- `webServer`: `npm run dev -- -p 3500`, `reuseExistingServer: true`, timeout 180 s, env `NEXT_DIST_DIR=.next-qa` (đổi bằng `E2E_DIST_DIR`), `DATABASE_URL=file:<abs>/web/prisma/test.db` (hằng `E2E_DATABASE_URL` trong config), `ANTHROPIC_API_KEY=""`.
+  `next.config.ts` đọc `distDir` từ `NEXT_DIST_DIR` → nhiều dev server chạy song song trên cùng repo không ghi đè `.next` của nhau (các nhánh UI dùng `.next-b1/.next-b2/.next-c` ở cổng 3401–3403; e2e luôn là `.next-qa` ở 3500). Lưu ý: `next dev` tự thêm `<distDir>/types/**/*.ts` vào `tsconfig.json#include`.
+- `globalSetup` (`tests/e2e/global-setup.ts`): `prisma db push --skip-generate` (tạo file nếu chưa có) → `tests/e2e/reset-db.mjs` (xoá dữ liệu, **giữ nguyên file**) → `node prisma/seed.mjs` → tạo bài viết `demo-article` (nội dung ~900 từ từ `tests/unit/fixtures/sample-article.ts`, ảnh thay bằng SVG data URI) để có trang editor bài viết, và đặt `process.env.E2E_ANALYSIS_ID` (id phân tích seed là cuid ngẫu nhiên) cho worker — cùng env.
   Không xoá file DB vì Playwright khởi động `webServer` *trước* `globalSetup`: server đã mở file, xoá/tạo lại sẽ gây `SQLITE_READONLY_DBMOVED` ("attempt to write a readonly database").
 - 2 project: `chromium` (Desktop Chrome) và `phone` (390×844, isMobile, touch, UA iPhone 13 — chạy bằng Chromium, không tải WebKit).
 - Chromium: dùng `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` nếu tồn tại (hoặc `PW_CHROME_PATH`), ngược lại dùng browser Playwright cài (CI).
@@ -58,7 +68,36 @@ Cấu hình: `playwright.config.ts`
 | `briefs.spec.ts` | Danh sách brief; trang brief (outline, E-E-A-T, schema, FAQ, link tải .md); API `/api/briefs/demo-brief/markdown` → `# Content Brief`, `?download=1`, 404 |
 | `usage.spec.ts` | Trang Chi phí AI: KPI + 2 bảng |
 | `articles.spec.ts` | Sprint 3 — skip nếu route 404: danh sách bài viết, form bị vô hiệu, 404 bài không tồn tại |
-| `layout.spec.ts` | Quét mọi route (cả 2 project): status 200, có H1, không lỗi, không tràn ngang |
+| `a11y.spec.ts` | **UX gate** — axe-core WCAG 2.0 A/AA + 2.1 AA, 10 trang × 2 project (xem mục 3a) |
+| `layout.spec.ts` | **UX gate** — 10 trang × 4 viewport (360/768/1024/1440): status 200, có H1, tràn ngang trang/phần tử, H1 bị cắt, sticky đè heading, CLS; vùng chạm trên phone (mục 3a) |
+| `motion.spec.ts` | **UX gate** — reduced-motion, smooth scroll, TOC neo dưới header, NavProgress, BackToTop, vùng toast |
+| `keyboard.spec.ts` | **UX gate** — Tab đầu tiên tới skip link/nav, focus nhìn thấy, Escape đóng menu, Ctrl+S trong editor |
+| `visual.spec.ts` | Ảnh full-page 10 trang ở 1440 (chromium) và 390 (phone) → `test-results/visual/*.png` + attachment (không so snapshot) |
+
+## 3a. UX quality gates
+
+Hạ tầng chung `tests/e2e/ux.ts`: `UX_PAGES` (10 trang: trang chủ, dự án, phân tích, DS cluster, editor cluster, DS brief, brief, DS bài viết, editor bài viết, chi phí AI), `settle()` (load → networkidle ≤ 10 s → `document.fonts.ready` → animation hữu hạn trên DocumentTimeline xong, ≤ 3 s), `installUxHelpers()` (tiêm `window.__ux`: selector dễ đọc — class CSS-module rút gọn `Shell-module__x__header` → `Shell__header`, đoạn text, kiểm tra hiển thị, nhận diện bên thứ ba `.react-flow`/`nextjs-portal`) và `recordUx()` (ghi `test-results/ux-report/<suite>__<trang>__<biến thể>.json` + attachment). `npm run ux:report [file.md]` gộp thành bảng trang × check kèm selector/đoạn text vi phạm.
+
+| Bộ | Check | Ngưỡng | Vì sao |
+| --- | --- | --- | --- |
+| a11y | axe `wcag2a`, `wcag2aa`, `wcag21aa` | **fail** khi `serious`/`critical`; `moderate`/`minor` chỉ log + ghi báo cáo | serious/critical chặn người dùng thật (tương phản, nhãn thiếu, ARIA sai); moderate thường là vấn đề cấu trúc nên sửa dần. Chạy với reduced-motion để animation vào trang không làm sai phép đo tương phản. Báo cáo axe đầy đủ: attachment `axe-<trang>-<project>.json`. |
+| a11y | loại trừ | `nextjs-portal`, `.react-flow__minimap`, `.react-flow__attribution` | overlay dev của Next (không có ở production) và markup nội bộ @xyflow/react mà app không kiểm soát; node/edge/controls React Flow vẫn được quét |
+| layout (a) | tràn ngang trang | `scrollWidth ≤ innerWidth` | cuộn ngang toàn trang là lỗi bố cục rõ nhất trên mobile; báo phần tử ngoài cùng lòi khỏi viewport |
+| layout (b) | phần tử tràn hộp | `scrollWidth ≤ clientWidth + 1` trừ `overflow-x: auto/scroll`, `text-overflow: ellipsis`, sr-only, React Flow; chỉ tính tràn do con **trong luồng** hoặc text (bỏ qua trang trí `position:absolute` như mũi tên `::after`); báo phần tử sâu nhất + con gây tràn | bắt nút/nhãn/bảng bị đẩy ra ngoài card trước khi nó thành tràn trang |
+| layout (c) | H1 bị cắt | không ellipsis / line-clamp nào thực sự cắt chữ trong `h1` | tiêu đề trang phải đọc được đầy đủ |
+| layout (d) | sticky | sau tải: sticky/fixed (cao > 3 px) không giao heading đầu tiên của `<main>`; cuộn giữa trang: các sticky ở nửa trên không chồng nhau | header + sub-nav + dải TOC + toolbar xếp chồng phải khớp `--header-offset`/`--subnav-h` |
+| layout (e) | CLS | **< 0.1** (cửa sổ phiên lớn nhất kiểu web-vitals, `PerformanceObserver({type:'layout-shift', buffered:true})` sau load + 1 s) | ngưỡng "Good" của Core Web Vitals; báo nguồn dịch chuyển |
+| layout (f) | vùng chạm (project phone 390×844, `hasTouch`) | **≥ 40×40 px** cho `button`, `a[href]`, `[role=button]`, `input[type=checkbox]` trong `<main>`; miễn `p a` (link trong đoạn văn) và React Flow; vùng nới bằng `::before`/`<label>` được tính (thử `elementFromPoint` 4 điểm quanh tâm) | gần mức 44 px của Apple/WCAG 2.5.5 nhưng chừa chỗ cho nút compact 40 px của DS; WCAG 2.5.8 miễn link trong câu |
+| motion | reduced-motion | không animation **hữu hạn** đang chạy sau load (lấy mẫu lúc load và +300 ms); bỏ qua vô hạn (skeleton/spinner), transition ≤ 10 ms (reset `0.01ms` chuẩn) và overlay dev; `html` không `scroll-behavior: smooth` | tôn trọng `prefers-reduced-motion` |
+| motion | smooth scroll / TOC | không reduce → `scroll-behavior: smooth`; bấm mục 3 và mục cuối của TOC (`nav[aria-label]`/`[role=navigation][aria-label]` có `a[href^="#"]`) ở 1440 và 390 → `top(section) ≥ đáy sticky ngang ở mép trên − 2 px`; **skip** khi trang chưa có TOC | neo không bị header/sub-nav/dải TOC che (`scroll-margin-top`) |
+| motion | NavProgress / BackToTop / Toast | thanh fixed ≤ 3 px ở đỉnh xuất hiện khi bấm link sub-nav và biến mất ≤ 5 s sau điều hướng; BackToTop ẩn ở đầu trang, hiện sau cuộn 2 màn hình, bấm → `scrollY < 5`; `[role=region][aria-label="Thông báo"]` có `aria-live` | phản hồi điều hướng và quay lại đầu trang trên trang dài |
+| keyboard | Tab đầu tiên | skip link (`a[href^="#"]` trỏ id tồn tại) hoặc phần tử trong `header`/`nav` | người dùng bàn phím không phải Tab qua nội dung trước khi tới điều hướng |
+| keyboard | focus visible | tối đa 40 tab stop; phần tử focus có `outline` (≠ none, width > 0) hoặc `box-shadow` ≠ none, hoặc cha đổi style khi focus (`:focus-within`) | WCAG 2.4.7 |
+| keyboard | Escape | `[aria-expanded]` toggle và `<details>` dạng dropdown (con `position: absolute/fixed`) phải đóng bằng Escape; `<details>` accordion thường chỉ ghi info | WAI-ARIA: menu/popup đóng bằng Escape; disclosure không bắt buộc |
+| keyboard | Ctrl+S | editor bài viết: sửa tiêu đề → "Chưa lưu thay đổi" → Ctrl+S → "Đã lưu" (rồi trả lại tiêu đề gốc); editor cluster: skip nếu chưa hỗ trợ | phím tắt lưu quen thuộc |
+| visual | ảnh | không assertion | UI đang redesign — người review bằng mắt; chuyển sang `toHaveScreenshot` khi UI ổn định |
+
+Baseline lần đầu (trước khi redesign xong): xem `scratchpad/ux/qa-baseline.md` của phiên QA; tái tạo bằng `npm run test:e2e:ux; npm run ux:report baseline.md`.
 
 ## 4. Lint design token
 
@@ -106,4 +145,5 @@ Khi lint đã sạch ổn định, bỏ `continue-on-error` trong CI để lint 
 - E2E không kiểm tra stream SSE của Writer và luồng sửa/chấm AI (cần API key hoặc server mock).
 - Server actions (`actions.ts`, `article-actions.ts`) chưa có test tích hợp với Prisma (có thể chạy trên `test.db` trong tương lai).
 - E2E dùng dev server (biên dịch chậm, có thể flaky lần đầu); CI nên cân nhắc `next build && next start -p 3500` để ổn định hơn.
-- `lint:tokens` hiện chỉ báo cáo (`continue-on-error`) cho tới khi team UI sửa 6 vi phạm ở mục 4.
+- UX gate chưa tự động hoá: độ "mượt" cảm nhận của animation (easing/thời lượng chỉ đo gián tiếp qua token), tỉ lệ/khoảng trắng "hợp lý" (cần review ảnh `test-results/visual/`), kéo-thả/pinch trên React Flow bằng cảm ứng, đọc bằng screen reader thật (axe chỉ kiểm tra tĩnh), hiệu năng cuộn (FPS/long task) và CLS khi tương tác (chỉ đo lúc tải).
+- Vùng chạm trong React Flow (handle 6–8 px) được miễn vì là của thư viện — trên điện thoại vẫn khó kéo edge.

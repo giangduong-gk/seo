@@ -1,19 +1,22 @@
 "use client";
 
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { memo, type CSSProperties } from "react";
 import { Badge } from "@/components/ui";
 import type { ClusterNode } from "@/lib/schemas";
 import s from "./ClusterEditor.module.css";
 
-export type TopicNodeType = Node<{ node: ClusterNode; hasBrief: boolean }, "topic">;
+/** `i`: thứ tự lúc vẽ lần đầu → độ trễ hiệu ứng xuất hiện (node thêm sau không có `i`). */
+export type TopicNodeType = Node<{ node: ClusterNode; hasBrief: boolean; i?: number }, "topic">;
 
 const KIND_LABEL: Record<ClusterNode["kind"], string> = { pillar: "Pillar", cluster: "Cluster", supporting: "Supporting" };
 const INTENT_TONE = { informational: "info", commercial: "warning", transactional: "success", navigational: "neutral", mixed: "outline" } as const;
 
-export function TopicNode({ data, selected }: NodeProps<TopicNodeType>) {
+function TopicNodeView({ data, selected }: NodeProps<TopicNodeType>) {
   const n = data.node;
+  const style = data.i != null ? ({ "--i": Math.min(data.i, 12) } as CSSProperties) : undefined;
   return (
-    <div className={[s.node, s[n.kind] ?? "", selected ? s.nodeSelected : ""].join(" ")} title={n.summary}>
+    <div className={[s.node, s[n.kind] ?? "", selected ? s.nodeSelected : ""].join(" ")} style={style} title={n.summary ? `${n.title}\n\n${n.summary}` : n.title}>
       <Handle type="target" position={Position.Top} className={s.handle} />
       <div className={s.kind}><span>{KIND_LABEL[n.kind]}</span>{data.hasBrief && <span className={s.dot} title="Đã có brief" />}</div>
       <div className={s.title}>{n.title}</div>
@@ -26,3 +29,5 @@ export function TopicNode({ data, selected }: NodeProps<TopicNodeType>) {
     </div>
   );
 }
+
+export const TopicNode = memo(TopicNodeView);

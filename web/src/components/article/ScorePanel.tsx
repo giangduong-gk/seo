@@ -1,31 +1,75 @@
 "use client";
 
 import { CircleAlert, CircleCheck, CircleX, Gauge, Wrench } from "lucide-react";
-import { Badge, Button, EmptyState, Panel, Progress } from "@/components/ui";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Badge, Button, EmptyState } from "@/components/ui";
 import type { ScoreCriterion, ScoreReport } from "@/lib/schemas";
 import s from "./ArticleEditor.module.css";
+import { useCountUp } from "./hooks";
+import { Section } from "./Section";
 import { scoreTone } from "./status";
 
 export type ScoreView = ScoreReport & { id: string; createdAt: string };
+type Filter = "fix" | "pass" | "all";
 
 const ICON = { pass: CircleCheck, warn: CircleAlert, fail: CircleX } as const;
+const STATUS_TEXT = { pass: "Đạt", warn: "Cần cải thiện", fail: "Không đạt" } as const;
+const ORDER = { fail: 0, warn: 1, pass: 2 } as const;
 
-function Criterion({ c, onFix, fixDisabled }: { c: ScoreCriterion; onFix: (fix: string) => void; fixDisabled: boolean }) {
+function ScoreRow({ label, value }: { label: string; value: number }) {
+  const v = useCountUp(value);
+  const tone = scoreTone(value);
+  return (
+    <div className={s.scoreRow}>
+      <div className={s.scoreMeta}>
+        <span className={s.scoreLabel}>{label}</span>
+        <div className={s.scoreTrack} role="progressbar" aria-label={`Điểm ${label}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}>
+          <div className={[s.scoreFill, s[`fill_${tone}`]].join(" ")} style={{ transform: `scaleX(${Math.max(0, Math.min(100, v)) / 100})` }} />
+        </div>
+      </div>
+      <span className={[s.scoreNum, s[tone]].join(" ")} aria-hidden>{Math.round(v)}</span>
+    </div>
+  );
+}
+
+function Reason({ text }: { text: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [clamped, setClamped] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => { if (!open) setClamped(el.scrollHeight > el.clientHeight + 1); };
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text, open]);
+  return (
+    <div className={s.reasonWrap}>
+      <div ref={ref} className={["caption", s.reason, open ? s.reasonOpen : ""].join(" ")}>{text}</div>
+      {(clamped || open) && <button type="button" className={s.moreBtn} onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Thu gọn" : "Xem thêm"}</button>}
+    </div>
+  );
+}
+
+function Criterion({ c, onFix, fixDisabled, fixing }: { c: ScoreCriterion; onFix: (c: ScoreCriterion) => void; fixDisabled: boolean; fixing: boolean }) {
   const Icon = ICON[c.status];
   const cls = c.status === "pass" ? s.pass : c.status === "warn" ? s.warn : s.fail;
   return (
-    <li className={s.crit}>
-      <Icon size={16} className={cls} aria-label={c.status === "pass" ? "Đạt" : c.status === "warn" ? "Cần cải thiện" : "Không đạt"} />
+    <li className={[s.crit, fixing ? s.critFixing : ""].join(" ")} aria-busy={fixing || undefined}>
+      <Icon size={16} className={cls} aria-label={STATUS_TEXT[c.status]} />
       <div style={{ minWidth: 0 }}>
         <div className={s.critHead}>
           <span className={s.critLabel}>{c.label}</span>
           <Badge tone="outline" title="Trọng số">×{c.weight}</Badge>
           {c.source === "ai" && <Badge tone="info">AI</Badge>}
         </div>
-        {c.reason && <div className="caption" style={{ marginTop: 2 }}>{c.reason}</div>}
+        {c.reason && <Reason text={c.reason} />}
         {c.status !== "pass" && c.fix && (
-          <div style={{ marginTop: 6 }}>
-            <Button size="s" variant="secondary" iconLeft={<Wrench size={13} aria-hidden />} onClick={() => onFix(c.fix)} disabled={fixDisabled} title={c.fix}>Sửa</Button>
+          <div className={s.critAction}>
+            <Button size="s" variant="secondary" iconLeft={<Wrench size={13} aria-hidden />} onClick={() => onFix(c)} loading={fixing} disabled={fixDisabled && !fixing} title={c.fix}>{fixing ? "Đang sửa…" : "Sửa"}</Button>
           </div>
         )}
       </div>
@@ -33,35 +77,76 @@ function Criterion({ c, onFix, fixDisabled }: { c: ScoreCriterion; onFix: (fix: 
   );
 }
 
-export function ScorePanel({ score, scoring, streaming, canGenerate, onScore, onFix }: { score: ScoreView | null; scoring: boolean; streaming: boolean; canGenerate: boolean; onScore: (withAi: boolean) => void; onFix: (fix: string) => void }) {
+function Group({ title, all, items, onFix, fixDisabled, fixingId }: { title: string; all: ScoreCriterion[]; items: ScoreCriterion[]; onFix: (c: ScoreCriterion) => void; fixDisabled: boolean; fixingId: string | null }) {
+  if (all.length === 0 || items.length === 0) return null;
+  return (
+    <div>
+      <div className={["micro", s.groupHead].join(" ")}><span>{title}</span><span className="mono">{all.filter((c) => c.status === "pass").length}/{all.length} đạt</span></div>
+      <ul className={s.critList}>{items.map((c) => <Criterion key={c.id} c={c} onFix={onFix} fixDisabled={fixDisabled} fixing={fixingId === c.id} />)}</ul>
+    </div>
+  );
+}
+
+export function ScorePanel({ score, scoring, streaming, canGenerate, fixingId, onScore, onFix }: {
+  score: ScoreView | null; scoring: boolean; streaming: boolean; canGenerate: boolean; fixingId: string | null;
+  onScore: (withAi: boolean) => void; onFix: (c: ScoreCriterion) => void;
+}) {
   const fixDisabled = streaming || scoring || !canGenerate;
+  const criteria = useMemo(() => [...(score?.criteria ?? [])].sort((a, b) => ORDER[a.status] - ORDER[b.status] || b.weight - a.weight), [score]);
+  const nFix = criteria.filter((c) => c.status !== "pass").length;
+  const nPass = criteria.length - nFix;
+  const [filter, setFilter] = useState<Filter>(nFix > 0 ? "fix" : "all");
+  // Lần chấm mới: quay về "Cần sửa" nếu còn tiêu chí chưa đạt
+  const scoreId = score?.id;
+  useEffect(() => { setFilter(nFix > 0 ? "fix" : "all"); }, [scoreId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!score) {
     return (
-      <Panel title="Điểm SEO / GEO">
-        <EmptyState icon={<Gauge size={22} />} title="Chưa chấm điểm" text="Rule engine chấm SEO ngay không tốn token; bật AI để chấm thêm GEO / E-E-A-T." action={<Button size="s" variant="secondary" onClick={() => onScore(false)} loading={scoring} disabled={streaming}>Chấm ngay (rule)</Button>} />
-      </Panel>
+      <Section title="Điểm SEO / GEO" sub="chưa chấm" defaultOpen>
+        <EmptyState icon={<Gauge size={22} />} title="Chưa chấm điểm" text="Rule engine chấm SEO ngay, không tốn token; bật AI để chấm thêm GEO / E-E-A-T." action={<Button size="s" variant="secondary" onClick={() => onScore(false)} loading={scoring} disabled={streaming}>Chấm ngay (rule)</Button>} />
+      </Section>
     );
   }
-  const seo = score.criteria.filter((c) => c.group === "seo");
-  const geo = score.criteria.filter((c) => c.group === "geo");
+
+  const visible = criteria.filter((c) => filter === "all" || (filter === "fix" ? c.status !== "pass" : c.status === "pass"));
+  const seoAll = criteria.filter((c) => c.group === "seo");
+  const geoAll = criteria.filter((c) => c.group === "geo");
   const when = new Date(score.createdAt);
+  const chips: [Filter, string, number][] = [["fix", "Cần sửa", nFix], ["pass", "Đạt", nPass], ["all", "Tất cả", criteria.length]];
+
   return (
-    <Panel title="Điểm SEO / GEO" sub={scoring ? "đang chấm…" : undefined} action={
-      <button type="button" className={s.linkBtn} onClick={() => onScore(true)} disabled={scoring || streaming || !canGenerate} title={canGenerate ? "Chấm lại bằng rule engine + Claude" : "Chưa có ANTHROPIC_API_KEY"}>Chấm lại (có AI)</button>
-    }>
-      <div className={s.scores}>
-        {([["SEO", score.seoScore], ["GEO", score.geoScore]] as const).map(([label, v]) => (
-          <div key={label} className={s.scoreRow}>
-            <Progress value={v / 100} label={label} tone={scoreTone(v)} />
-            <span className={[s.scoreNum, s[scoreTone(v)]].join(" ")}>{v}</span>
-          </div>
-        ))}
+    <Section title="Điểm SEO / GEO" sub={scoring ? "đang chấm…" : `${nFix} cần sửa`} defaultOpen>
+      <div className={[s.scores, scoring ? s.scoresBusy : ""].join(" ")}>
+        <ScoreRow label="SEO" value={score.seoScore} />
+        <ScoreRow label="GEO" value={score.geoScore} />
       </div>
       {score.summary && <p className="body-s secondary">{score.summary}</p>}
-      <div className="caption mono">{score.model ? `${score.model} · ` : "rule engine · "}{when.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })}</div>
-      {seo.length > 0 && <div><div className="micro" style={{ marginBottom: 8 }}>SEO (rule) · {seo.filter((c) => c.status === "pass").length}/{seo.length}</div><ul className={s.critList}>{seo.map((c) => <Criterion key={c.id} c={c} onFix={onFix} fixDisabled={fixDisabled} />)}</ul></div>}
-      {geo.length > 0 && <div><div className="micro" style={{ marginBottom: 8 }}>GEO · {geo.filter((c) => c.status === "pass").length}/{geo.length}</div><ul className={s.critList}>{geo.map((c) => <Criterion key={c.id} c={c} onFix={onFix} fixDisabled={fixDisabled} />)}</ul></div>}
-      {geo.length === 0 && <p className="caption">Chưa có tiêu chí GEO — bấm “Chấm lại (có AI)” để Claude đánh giá answer-first, citability, E-E-A-T.</p>}
-    </Panel>
+      <div className={s.scoreFoot}>
+        <span className="caption mono">{score.model ? `${score.model} · ` : "rule engine · "}{when.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })}</span>
+        <button type="button" className={s.linkBtn} onClick={() => onScore(true)} disabled={scoring || streaming || !canGenerate} title={canGenerate ? "Chấm lại bằng rule engine + Claude" : "Chưa có ANTHROPIC_API_KEY"}>Chấm lại (có AI)</button>
+      </div>
+
+      {criteria.length > 0 && (
+        <div className={s.chips} role="group" aria-label="Lọc tiêu chí">
+          {chips.map(([k, label, n]) => (
+            <button key={k} type="button" className={[s.chip, filter === k ? s.chipOn : ""].join(" ")} aria-pressed={filter === k} onClick={() => setFilter(k)} disabled={n === 0 && k !== "all"}>
+              {label}<span className={s.chipCount}>{n}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div key={filter} className={s.fadeIn}>
+        {visible.length === 0 ? (
+          <p className="caption">{filter === "fix" ? "Mọi tiêu chí đều đạt — tuyệt vời." : "Chưa có tiêu chí nào đạt."}</p>
+        ) : (
+          <div className={s.groups}>
+            <Group title="SEO (rule)" all={seoAll} items={visible.filter((c) => c.group === "seo")} onFix={onFix} fixDisabled={fixDisabled} fixingId={fixingId} />
+            <Group title="GEO" all={geoAll} items={visible.filter((c) => c.group === "geo")} onFix={onFix} fixDisabled={fixDisabled} fixingId={fixingId} />
+          </div>
+        )}
+      </div>
+      {geoAll.length === 0 && <p className="caption">Chưa có tiêu chí GEO — bấm “Chấm lại (có AI)” để Claude đánh giá answer-first, citability, E-E-A-T.</p>}
+    </Section>
   );
 }

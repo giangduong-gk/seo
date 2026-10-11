@@ -3,7 +3,8 @@ import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * E2E smoke — chạy dev server riêng trên cổng 3500 với DB SQLite riêng (prisma/test.db, đường dẫn tuyệt đối) và KHÔNG có API key
+ * E2E smoke + UX gates — chạy dev server riêng trên cổng 3500 (distDir `.next-qa` qua NEXT_DIST_DIR để không đụng
+ * các dev server khác đang chạy song song trên cùng repo, vd. `.next-b1` ở cổng 3401) với DB SQLite riêng (prisma/test.db, đường dẫn tuyệt đối) và KHÔNG có API key
  * (UI hiển thị thông báo vàng, nút sinh nội dung bị vô hiệu → không gọi Claude thật).
  *
  * Lưu ý env: `@next/env` chụp process.env lúc khởi động và không cho .env ghi đè khoá đã có mặt — kể cả chuỗi rỗng —
@@ -48,6 +49,7 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 180_000,
     env: {
+      NEXT_DIST_DIR: process.env.E2E_DIST_DIR || ".next-qa",
       DATABASE_URL: E2E_DATABASE_URL,
       ANTHROPIC_API_KEY: "",
       ENABLE_WEB_SEARCH: "false",
