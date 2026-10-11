@@ -1,0 +1,28 @@
+/* Skeleton xuất hiện sau một nhịp ngắn → lần tải nhanh không nháy khung xám */
+.page { animation: sk-in var(--dur-base) var(--ease-out) 120ms both; }
+@keyframes sk-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .page { animation: none; } }
+
+.projectHead { display: grid; gap: 6px; }
+.title { font: var(--text-h1); margin-top: 2px; }
+.metaRow { display: flex; flex-wrap: wrap; gap: 6px var(--space-3); align-items: center; }
+.metaText { font: var(--text-body-s); }
+:global(.stack) > .projectHead + * { margin-top: calc(var(--space-3) - var(--cms-section-gap)); }
+
+.panel { background: var(--surface-card); border: 1px solid var(--line-1); border-radius: var(--cms-panel-radius); overflow: hidden; }
+.panelHead { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--cms-panel-head-h); padding: 10px var(--cms-panel-pad-x); border-bottom: 1px solid var(--line-1); }
+.body { padding: var(--cms-panel-pad-y) var(--cms-panel-pad-x); display: flex; flex-direction: column; gap: var(--cms-panel-gap); }
+.field { display: grid; gap: 6px; }
+.rows { padding: var(--cms-panel-flush-y) 0; }
+.row { display: flex; align-items: center; gap: var(--space-3); min-height: var(--cms-row-h); padding: 12px var(--cms-panel-pad-x); border-bottom: 1px solid var(--line-1); }
+.row:last-child { border-bottom: 0; }
+.rowText { flex: 1 1 auto; min-width: 0; display: grid; gap: 8px; }
+
+.stat { display: flex; flex-direction: column; gap: 6px; padding: var(--space-4) var(--cms-panel-pad-x); background: var(--surface-card); border: 1px solid var(--line-1); border-radius: var(--cms-panel-radius); }
+
+.split { display: grid; gap: var(--cms-grid-gap); grid-template-columns: repeat(auto-fit, minmax(min(var(--min), 100%), 1fr)); align-items: start; }
+.statLabel { font: var(--text-micro); }
+.statValue { font: var(--text-h1); line-height: 1.15; }
+.statSub { font: var(--text-caption); }
+.narrowOnly { display: none; }
+@media (max-width: 599px) { .narrowOnly { display: inline; } }

@@ -1,7 +1,46 @@
-.nav { display: flex; gap: 2px; border-bottom: 1px solid var(--line-1); overflow-x: auto; scrollbar-width: none; }
-.nav::-webkit-scrollbar { display: none; }
-.item { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; color: var(--fg-2); font: 500 14px/1 var(--font-body); white-space: nowrap; border-radius: var(--radius-s) var(--radius-s) 0 0; transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); }
+/* SubNav — tabs underline dính dưới header; trong suốt khi ở vị trí tĩnh, nền mờ tràn viền khi đã dính. */
+.wrap { position: relative; }
+.sticky {
+  position: sticky; top: var(--header-offset); z-index: calc(var(--z-sticky) - 1);
+  margin-inline: calc(var(--page-pad-x) * -1); padding-inline: var(--page-pad-x);
+}
+/* Khi đã dính: nền mờ như header, tràn hết bề ngang màn hình bằng border-image outset (chỉ là "ink", không tạo cuộn ngang)
+   + đường kẻ đáy tràn viền. Ở vị trí tĩnh: trong suốt, hoà vào nền trang. */
+.sticky[data-stuck] {
+  backdrop-filter: var(--blur-header); -webkit-backdrop-filter: var(--blur-header);
+  border-image: linear-gradient(to top, var(--line-2) 1px, var(--header-bg) 1px) fill 0 / / 0 100vmax;
+}
+.sticky[data-stuck] .navFrame { border-bottom-color: transparent; }
+
+.navFrame { position: relative; border-bottom: 1px solid var(--line-1); }
+.nav { position: relative; display: flex; gap: 2px; }
+/* Mép mờ chỉ cần khi tràn: từ 900px dải tab luôn vừa → bỏ mask để chữ tab đầu không bị mờ */
+@media (min-width: 900px) { .nav { mask-image: none; } }
+.nav > * { scroll-snap-align: center; }
+
+.item {
+  position: relative; flex: none; display: inline-flex; align-items: center; gap: 8px;
+  height: 44px; padding: 0 12px; color: var(--fg-2); font: 500 14px/1 var(--font-body); white-space: nowrap;
+  border-radius: var(--radius-s) var(--radius-s) 0 0;
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.item:first-child { margin-left: -12px; }
+@media (max-width: 899px) { .item:first-child { margin-left: 0; } .nav { padding-inline: 4px 16px; } }
 .item:hover { color: var(--fg-1); background: var(--state-1); }
-.active { color: var(--fg-1); }
-.active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 2px; background: var(--volt); border-radius: 2px; }
-.count { font: var(--text-micro); color: var(--fg-3); background: var(--bg-3); padding: 2px 6px; border-radius: var(--radius-badge); }
+.item:active { background: var(--state-2); }
+.item:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--volt); }
+.active, .current { color: var(--fg-1); }
+/* Gạch chân tĩnh (SSR) cho tới khi JS đo xong → không nháy; sau đó nhường cho .indicator trượt */
+.active::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 0; height: 2px; background: var(--volt); border-radius: 2px; }
+.ready .active::after { content: none; }
+
+.indicator {
+  position: absolute; left: 0; bottom: 0; height: 2px; width: 0; opacity: 0;
+  background: var(--volt); border-radius: 2px; pointer-events: none;
+  clip-path: inset(0 12px); /* gạch chân hụt 12px mỗi bên = padding tab */
+  transition: transform var(--dur-base) var(--ease-out), width var(--dur-base) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+.nav:not(.ready) .indicator { visibility: hidden; }
+
+.count { font: var(--text-micro); font-variant-numeric: tabular-nums; color: var(--fg-3); background: var(--bg-3); min-width: 20px; text-align: center; padding: 2px 6px; border-radius: var(--radius-badge); transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); }
+.active .count, .current .count { color: var(--fg-1); background: var(--bg-4); }

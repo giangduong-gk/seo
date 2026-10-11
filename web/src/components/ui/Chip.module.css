@@ -2,3 +2,14 @@
 .chip > span { overflow: hidden; text-overflow: ellipsis; }
 .selected { background: var(--volt-soft); border-color: rgba(255,234,0,0.28); color: var(--volt); } /* lint-allow-color: viền vàng 28% theo pattern Toggle của DS, chưa có token */
 .muted { color: var(--fg-2); }
+
+/* Biến thể bấm được */
+.interactive {
+  cursor: pointer; height: var(--chip-h); font-family: var(--font-body);
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), transform var(--dur-instant) var(--ease-out);
+}
+.interactive:hover:not(:disabled) { background: var(--state-3); border-color: var(--line-3); color: var(--fg-1); }
+.interactive.selected:hover:not(:disabled) { background: var(--volt-soft); border-color: var(--volt); color: var(--volt); }
+.interactive:active:not(:disabled) { transform: scale(var(--press-scale)); background: var(--state-4); }
+.interactive:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.interactive:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }

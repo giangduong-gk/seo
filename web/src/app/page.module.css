@@ -1,0 +1,56 @@
+/* Trang chủ — lưới thẻ dự án + cột tạo dự án (≥1024: 380px dính; nhỏ hơn: xếp dưới) */
+@media (min-width: 1024px) { :global(.page-head) > .headAction { display: none; } } /* form đã hiện bên phải */
+.newBtn {
+  display: inline-flex; align-items: center; gap: var(--space-2); height: var(--control-h-m); padding: 0 var(--control-pad-m);
+  border-radius: var(--radius-button); background: var(--bg-3); border: 1px solid var(--line-2); color: var(--fg-1); font: 500 14px/1 var(--font-body);
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-instant) var(--ease-out);
+}
+.newBtn:hover { background: var(--bg-4); border-color: var(--line-3); }
+.newBtn:active { transform: scale(var(--press-scale)); }
+@media (min-width: 1024px) { .onlyStacked { display: none; } }
+
+/* Cách dùng: 2×2 trên điện thoại, 4 cột từ 900px */
+.steps { display: grid; gap: var(--space-3); }
+.stepList { display: grid; gap: var(--space-2); grid-template-columns: repeat(2, minmax(0, 1fr)); counter-reset: step; }
+@media (min-width: 900px) { .stepList { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); } }
+.step { position: relative; display: flex; gap: var(--space-3); align-items: flex-start; min-width: 0; padding: var(--space-3) var(--space-4); background: var(--surface-card); border: 1px solid var(--line-1); border-radius: var(--radius-m); }
+@media (min-width: 900px) {
+  /* mũi tên nối các bước */
+  .step:not(:last-child)::after { content: ""; position: absolute; right: -9px; top: 50%; width: 6px; height: 6px; border-top: 1.5px solid var(--fg-4); border-right: 1.5px solid var(--fg-4); transform: translateY(-50%) rotate(45deg); }
+}
+.stepNum { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: var(--radius-pill); background: var(--volt-soft); color: var(--volt); font: 600 12px/1 var(--font-mono); }
+.stepBody { display: grid; gap: 2px; min-width: 0; }
+.stepTitle { display: inline-flex; align-items: center; gap: 6px; font: 600 13px/1.3 var(--font-body); color: var(--fg-1); }
+.stepTitle svg { color: var(--fg-3); flex: none; }
+.stepText { font: var(--text-caption); color: var(--text-muted); }
+@media (max-width: 599px) { .stepTitle svg { display: none; } .step { padding: var(--space-3); gap: var(--space-2); } }
+
+.sectionHead { display: flex; align-items: baseline; gap: var(--space-2); }
+
+/* Lưới thẻ: 1 cột → 2 cột từ 600px (cột chính đủ rộng) */
+.grid { display: grid; gap: var(--cms-grid-gap); grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+.card {
+  display: flex; flex-direction: column; gap: var(--space-3); height: 100%;
+  padding: var(--space-4) var(--cms-panel-pad-x); background: var(--surface-card); border: 1px solid var(--line-1); border-radius: var(--cms-panel-radius);
+}
+.card:focus-visible { outline: none; box-shadow: var(--focus-ring); border-color: var(--volt); }
+.card:active { background: var(--bg-4); }
+.cardHead { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.cardTitle { font: var(--text-card-title); color: var(--fg-1); min-width: 0; overflow-wrap: anywhere; }
+.cardArrow { flex: none; margin-top: 3px; color: var(--fg-3); transition: transform var(--dur-base) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.card:hover .cardArrow { color: var(--volt); transform: translateX(3px); }
+.cardMeta { font: var(--text-body-s); color: var(--text-secondary); margin-top: calc(var(--space-2) * -1); overflow-wrap: anywhere; }
+
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: var(--space-3) 0; border-block: 1px solid var(--line-1); }
+.statCell { display: flex; flex-direction: column-reverse; gap: 2px; min-width: 0; padding-inline: 2px; }
+.statCell + .statCell { border-left: 1px solid var(--line-1); padding-left: var(--space-2); }
+.statCell dt { font: var(--text-caption); font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.statCell dd { margin: 0; font: 500 18px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--fg-1); }
+.statCell dd.zero { color: var(--fg-4); }
+
+.cardFoot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); font: var(--text-caption); color: var(--text-muted); margin-top: auto; }
+.footItem { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.cost { font: var(--text-mono); color: var(--fg-2); }
+
+.formPanel { scroll-margin-top: calc(var(--header-offset) + 16px); transition: border-color var(--dur-slow) var(--ease-out), box-shadow var(--dur-slow) var(--ease-out); }
+.formPanel:target { border-color: var(--volt); box-shadow: var(--focus-ring); }

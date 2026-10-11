@@ -6,7 +6,7 @@
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }
-section[id], h2[id], h3[id], [data-anchor] { scroll-margin-top: calc(var(--header-offset) + var(--subnav-h, 0px) + 16px); }
+/* (đã bao gồm khoảng thở 16px trong scroll-padding của html) */
 
 /* 1) Vào trang: các con trực tiếp của .stagger hiện lần lượt (6 phần tử đầu), phần còn lại hiện cùng lúc */
 .stagger > * { animation: ds-page-in var(--dur-page) var(--ease-emphasized) both; }

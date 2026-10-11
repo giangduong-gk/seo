@@ -1,0 +1,40 @@
+/* Chip từ khoá bấm-để-copy + nút copy nhỏ. Hover: nền state + icon copy hiện dần; cảm ứng: chip cao 44px. */
+.group { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 28px; }
+.copyAll {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px;
+  border: 0; border-radius: var(--radius-s); background: transparent; color: var(--fg-2); font: var(--text-caption); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.copyAll:hover { background: var(--state-2); color: var(--fg-1); }
+.copyAll:active { background: var(--state-3); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; height: 30px; padding: 0 10px 0 12px;
+  border-radius: var(--radius-pill); border: 1px solid var(--line-2); background: var(--state-1); color: var(--fg-1);
+  font: 500 13px/1 var(--font-body); cursor: copy;
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-instant) var(--ease-out);
+}
+.chip:hover { background: var(--state-3); border-color: var(--line-3); }
+.chip:active { transform: scale(var(--press-scale)); }
+.chip:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.chipLabel { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chipIcon { flex: none; color: var(--fg-3); opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); }
+.chip:hover .chipIcon, .chip:focus-visible .chipIcon { opacity: 1; }
+.primary { background: var(--volt-soft); border-color: var(--volt-soft); color: var(--volt); }
+.primary:hover { background: var(--volt-soft); border-color: var(--volt); }
+.primary .chipIcon { color: var(--volt); }
+.muted { color: var(--fg-2); }
+@media (pointer: coarse) {
+  .chip { height: var(--tap-min); padding: 0 14px; }
+  .chipIcon { opacity: 1; }
+  .copyAll { height: var(--tap-min); }
+  .tap { min-height: var(--tap-min); }
+}
+/* ≥ 900px: nhãn nhóm bên trái, chip bên phải → bớt một hàng tiêu đề mỗi nhóm */
+@media (min-width: 900px) {
+  .group { display: grid; grid-template-columns: 168px minmax(0, 1fr); column-gap: var(--space-6); align-items: start; }
+  .head { flex-direction: column; align-items: flex-start; gap: 2px; padding-top: 4px; }
+  .copyAll { margin-left: -10px; }
+}
+.group + .group { padding-top: var(--space-1); }

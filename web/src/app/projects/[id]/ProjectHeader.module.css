@@ -1,0 +1,8 @@
+/* Đầu trang dự án — gọn: ~110px trên điện thoại trước dải tab (trước đây ~300px) */
+.head { display: grid; gap: 6px; min-width: 0; }
+.title { font: var(--text-h1); letter-spacing: -0.01em; overflow-wrap: anywhere; margin-top: 2px; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--space-3); min-width: 0; }
+.metaText { font: var(--text-body-s); color: var(--text-secondary); min-width: 0; overflow-wrap: anywhere; }
+.badges { display: inline-flex; gap: 6px; min-width: 0; flex-wrap: wrap; }
+/* Dải tab ngay dưới đầu trang: khoảng cách 12px thay vì --cms-section-gap (24px) */
+:global(.stack) > .head + * { margin-top: calc(var(--space-3) - var(--cms-section-gap)); }

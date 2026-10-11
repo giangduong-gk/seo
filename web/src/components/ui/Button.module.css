@@ -1,22 +1,46 @@
 .btn {
+  position: relative;
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   height: var(--control-h-m); padding: 0 var(--control-pad-m);
   border-radius: var(--radius-button); border: 1px solid transparent;
-  font: 500 14px/1 var(--font-body); white-space: nowrap; cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), transform var(--dur-instant) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  font: 500 14px/1 var(--font-body); white-space: nowrap; cursor: pointer; user-select: none;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-instant) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
 }
 .btn:active:not(:disabled) { transform: scale(var(--press-scale)); }
 .btn:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+.btn.loading:disabled { opacity: 1; cursor: progress; } /* đang chạy ≠ bị khoá: giữ độ đậm */
 .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .s { height: var(--control-h-s); padding: 0 var(--control-pad-s); font-size: 13px; }
 .l { height: var(--control-h-l); padding: 0 var(--control-pad-l); font-size: 15px; }
 .full { width: 100%; }
+
 .primary { background: var(--volt-gradient); color: var(--on-volt); font-weight: 600; }
 .primary:hover:not(:disabled) { background: var(--volt-gradient-hover); }
 .primary:active:not(:disabled) { background: var(--volt-gradient-press); }
 .secondary { background: var(--bg-3); color: var(--fg-1); border-color: var(--line-2); }
-.secondary:hover:not(:disabled) { background: var(--bg-4); }
+.secondary:hover:not(:disabled) { background: var(--bg-4); border-color: var(--line-3); }
+.secondary:active:not(:disabled) { background: var(--bg-4); }
 .ghost { background: transparent; color: var(--fg-2); }
 .ghost:hover:not(:disabled) { background: var(--state-2); color: var(--fg-1); }
+.ghost:active:not(:disabled) { background: var(--state-3); }
 .danger { background: var(--danger-soft); color: var(--danger); border-color: var(--danger-line); }
+.danger:hover:not(:disabled) { border-color: var(--danger); }
+.danger:active:not(:disabled) { background: var(--danger-line); }
+
+.label { display: inline-flex; align-items: center; gap: inherit; min-width: 0; transition: opacity var(--dur-fast) var(--ease-out); }
+.slot { display: inline-grid; place-items: center; flex: none; }
+.slot > * { grid-area: 1 / 1; }
+.slotIcon { display: inline-flex; transition: opacity var(--dur-fast) var(--ease-out); }
+.loading .slotIcon { opacity: 0; }
+/* Không có icon trái: spinner nằm giữa, nhãn mờ đi nhưng vẫn giữ chỗ */
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; }
+.loading .overlay ~ .label { opacity: 0; }
 .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: ds-spin 0.8s linear infinite; }
+
+.kbd {
+  display: inline-flex; align-items: center; height: 20px; padding: 0 6px; margin-right: -4px;
+  border-radius: var(--radius-badge); border: 1px solid var(--line-2); background: var(--state-1);
+  font: var(--text-mono); font-size: 11px; color: inherit; opacity: 0.72; white-space: nowrap;
+}
+.primary .kbd { border-color: var(--media-shade); background: transparent; }
+@media (pointer: coarse) { .kbd { display: none; } }

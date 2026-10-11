@@ -1,0 +1,16 @@
+.list { display: grid; gap: 14px; }
+.row { display: grid; gap: 6px; min-width: 0; }
+.head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); min-width: 0; }
+.label { display: inline-flex; align-items: baseline; gap: 8px; min-width: 0; font: var(--text-body-s); color: var(--fg-1); white-space: nowrap; overflow: hidden; }
+.labelText { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dot { align-self: center; flex: none; width: 8px; height: 8px; border-radius: 2px; background: var(--bar-c); }
+.value { flex: none; font: var(--text-mono); font-variant-numeric: tabular-nums; color: var(--fg-1); display: inline-flex; gap: 8px; }
+.pct { color: var(--text-muted); min-width: 3.5ch; text-align: right; }
+.track { height: 8px; border-radius: var(--radius-pill); background: var(--chart-grid); overflow: hidden; }
+.bar {
+  height: 100%; border-radius: inherit; background: var(--bar-c);
+  transform-origin: left center; animation: ds-grow-x var(--dur-media) var(--ease-emphasized) both;
+  animation-delay: calc(var(--motion-stagger) * var(--i, 0));
+}
+.sub { flex: none; font: var(--text-caption); color: var(--text-muted); }
+@media (prefers-reduced-motion: reduce) { .bar { animation: none; } }

@@ -8,4 +8,7 @@ export { EmptyState } from "./EmptyState";
 export { SystemNotice } from "./SystemNotice";
 export { Table } from "./Table";
 export { Skeleton } from "./Skeleton";
+export { Stat } from "./Stat";
+export { BarList, type BarItem } from "./BarList";
+export { Kbd } from "./Kbd";
 export { ToastProvider, useToast, type ToastOptions, type ToastTone } from "./Toast";

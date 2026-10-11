@@ -9,3 +9,9 @@
 .blue .icon { color: var(--info); }
 .neutral { background: var(--bg-3); border-color: var(--line-2); color: var(--fg-2); }
 .content { flex: 1 1 auto; min-width: 0; }
+.notice { animation: ds-page-in var(--dur-slow) var(--ease-emphasized) both; }
+.close { flex: none; width: 28px; height: 28px; margin: -4px -6px -4px 0; display: grid; place-items: center; border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--fg-3); cursor: pointer; transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.close:hover { background: var(--state-2); color: var(--fg-1); }
+.close:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+@media (pointer: coarse) { .close { width: var(--tap-min); height: var(--tap-min); margin: -12px -14px -12px 0; } }
+@media (prefers-reduced-motion: reduce) { .notice { animation: none; } }

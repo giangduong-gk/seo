@@ -1,0 +1,26 @@
+.wrap { display: flex; flex-direction: column; min-width: 0; }
+.filter { display: flex; align-items: center; gap: var(--space-3); padding: 10px var(--cms-panel-pad-x) 12px; border-bottom: 1px solid var(--line-1); }
+.field { position: relative; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; }
+.icon { position: absolute; left: 12px; color: var(--fg-3); pointer-events: none; }
+.input {
+  width: 100%; height: var(--control-h-s-plus); padding: 0 36px 0 34px; border-radius: var(--radius-input);
+  background: var(--bg-1); border: 1px solid var(--line-2); color: var(--fg-1); font: var(--text-body-s);
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.input::placeholder { color: var(--fg-3); }
+.input:hover { border-color: var(--line-3); }
+.input:focus { outline: none; border-color: var(--volt); box-shadow: var(--focus-ring); }
+.input::-webkit-search-cancel-button { display: none; }
+.clear { position: absolute; right: 4px; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--fg-3); cursor: pointer; transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.clear:hover { background: var(--state-2); color: var(--fg-1); }
+.count { flex: none; font: var(--text-mono); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.list > li + li { border-top: 1px solid var(--line-1); }
+.row { width: 100%; min-width: 0; }
+.static { display: flex; align-items: center; gap: var(--space-3); min-height: var(--cms-row-h); padding: 12px var(--cms-panel-pad-x); opacity: 0.8; }
+.none { margin: 0; padding: 16px var(--cms-panel-pad-x); font: var(--text-body-s); color: var(--text-secondary); }
+.none button { background: none; border: 0; padding: 0; color: var(--fg-1); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; }
+@media (pointer: coarse) {
+  .input { height: var(--tap-min); }
+  .clear { width: 40px; height: 40px; right: 2px; }
+  .row { min-height: 60px; }
+}

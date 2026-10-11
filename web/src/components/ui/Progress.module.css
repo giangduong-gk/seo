@@ -2,7 +2,10 @@
 .head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); font: var(--text-caption); color: var(--text-secondary); }
 .track { position: relative; height: var(--progress-h); border-radius: var(--radius-pill); background: var(--state-4); overflow: hidden; }
 .fill { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--volt-gradient); transition: width var(--dur-media) var(--ease-out); }
+/* Lần đầu hiện: chạy từ 0 (transform → không layout); sau đó đổi giá trị thì width chuyển mượt */
+.grow { transform-origin: left center; animation: ds-grow-x var(--dur-media) var(--ease-emphasized) both; }
 .indeterminate { width: 40%; animation: ds-indeterminate 1.2s var(--ease-in-out) infinite; }
 .success .fill { background: var(--success); }
 .warning .fill { background: var(--warning); }
 .danger .fill { background: var(--danger); }
+@media (prefers-reduced-motion: reduce) { .grow { animation: none; } }
