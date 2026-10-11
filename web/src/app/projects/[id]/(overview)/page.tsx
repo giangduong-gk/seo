@@ -5,10 +5,10 @@ import { FilterList } from "@/components/content/FilterList";
 import { TimeAgo } from "@/components/content/time";
 import c from "@/components/content/content.module.css";
 import { hasApiKey } from "@/lib/claude";
-import { ProjectHeader } from "./ProjectHeader";
+import { ProjectHeader } from "../ProjectHeader";
 import { prisma } from "@/lib/db";
-import { KeywordForm } from "./KeywordForm";
-import { IntentBadge } from "./IntentBadge";
+import { KeywordForm } from "../KeywordForm";
+import { IntentBadge } from "../IntentBadge";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;

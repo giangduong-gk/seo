@@ -1,5 +1,5 @@
 import { expect, test } from "./fixtures";
-import { UX_PAGES, VIEWPORTS, gotoUx, installUxHelpers, recordUx, settle, type CheckResult } from "./ux";
+import { UX_PAGES, VIEWPORTS, evalRetry, gotoUx, installUxHelpers, recordUx, settle, type CheckResult } from "./ux";
 
 /**
  * Layout gate — mọi trang × 4 viewport (360 · 768 · 1024 · 1440) trên project `chromium`, và kiểm tra vùng chạm
@@ -92,6 +92,8 @@ function auditLayout(): Audit {
       if (n.nodeType === Node.ELEMENT_NODE) {
         const ccs = getComputedStyle(n as Element);
         if (ccs.position === "absolute" || ccs.position === "fixed" || ccs.display === "none") continue;
+        // full-bleed chủ ý: con có margin ngang âm (vd. thanh công cụ sticky tràn sát mép màn hình)
+        if (parseFloat(ccs.marginLeft) < 0 || parseFloat(ccs.marginRight) < 0) continue;
         const cr = (n as Element).getBoundingClientRect();
         if (cr.width > 0 && (cr.right > inR || cr.left < inL)) return true;
       } else if (n.nodeType === Node.TEXT_NODE && n.textContent?.trim()) {
@@ -237,11 +239,11 @@ test.describe("layout × viewport", () => {
         await expect(page.locator("main")).toBeVisible();
         await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
         await page.waitForTimeout(1000);
-        const cls = await page.evaluate(measureCls);
+        const cls = await evalRetry(page, measureCls);
         await settle(page);
         if (p.key === "cluster-editor") await expect.poll(() => page.locator(".react-flow__node").count(), { timeout: 30_000 }).toBeGreaterThan(0);
-        const a = await page.evaluate(auditLayout);
-        const stack = await page.evaluate(auditStickyStack);
+        const a = await evalRetry(page, auditLayout);
+        const stack = await evalRetry(page, auditStickyStack);
 
         const checks: Record<string, CheckResult> = {
           "a·page-overflow": { pass: !a.pageOverflow, items: a.pageOverflow ? [a.pageOverflow] : [] },
@@ -275,7 +277,7 @@ test.describe("vùng chạm (phone 390×844, hasTouch)", () => {
       expect(status, `HTTP ${url}`).toBe(200);
       await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
       await settle(page);
-      const small = await page.evaluate(auditTouch, TOUCH_MIN);
+      const small = await evalRetry(page, auditTouch, TOUCH_MIN);
       await recordUx(testInfo, { suite: "layout", page: p.key, pageName: p.name, variant: "touch-390", url, checks: { "f·touch-target": { pass: small.length === 0, items: small } } });
       expect.soft(small, `(f) vùng chạm < ${TOUCH_MIN}×${TOUCH_MIN} trên ${url}:\n${small.map((s) => `- ${s.sel} "${s.text}" ${s.w}×${s.h}`).join("\n")}`).toEqual([]);
     });

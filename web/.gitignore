@@ -52,3 +52,5 @@ test-results/
 
 # thư mục build song song (NEXT_DIST_DIR)
 /.next-*
+
+playwright-report/

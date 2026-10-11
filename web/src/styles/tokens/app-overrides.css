@@ -1,0 +1,15 @@
+/* SEO Studio — ghi đè token AiDoIt ở cấp ứng dụng (không sửa file token gốc).
+   Lý do từng dòng được ghi kèm; xem docs/handoff.md của DS mục "Known gaps". */
+:root {
+  /* DS known gap: --fg-3 #6E737A chỉ đạt 3.72:1 trên --bg-2 và 3.96:1 trên --bg-1 (< 4.5:1 WCAG AA cho chữ thường).
+     #82878E đạt 4.92:1 / 5.23:1 mà vẫn giữ thứ bậc fg-2 > fg-3 > fg-4. */
+  --fg-3: #82878E;
+  --meta-text: #82878E;
+}
+@media (pointer: coarse) {
+  :root {
+    /* Vùng chạm tối thiểu 40px cho control size "s" trên màn cảm ứng (DS gốc 36px). */
+    --control-h-s: 40px;
+    --icon-btn-s: 40px;
+  }
+}

@@ -6,9 +6,9 @@ import { TimeAgo } from "@/components/content/time";
 import c from "@/components/content/content.module.css";
 import { hasApiKey } from "@/lib/claude";
 import { prisma } from "@/lib/db";
-import { IntentBadge } from "../IntentBadge";
-import { ProjectHeader } from "../ProjectHeader";
-import { BriefForm } from "./BriefForm";
+import { IntentBadge } from "../../IntentBadge";
+import { ProjectHeader } from "../../ProjectHeader";
+import { BriefForm } from "../BriefForm";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;

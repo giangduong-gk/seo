@@ -13,7 +13,7 @@
 .titleInput:hover { box-shadow: inset 0 -1px 0 var(--line-2); }
 .titleInput:focus { outline: none; box-shadow: 0 0 0 4px var(--bg-1), var(--focus-ring); }
 /* base.css ép input 16px trên màn chạm (chống zoom iOS) — tiêu đề vẫn giữ cỡ h1 (≥ 16px nên không zoom) */
-@media (pointer: coarse) { .titleInput { font-size: var(--fs-h1) !important; } }
+@media (pointer: coarse) { .titleInput { font-size: var(--fs-h2) !important; } }
 .status { display: inline-flex; align-items: center; gap: 7px; font: var(--text-caption); color: var(--text-muted); white-space: nowrap; }
 .statusDot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); transition: background var(--dur-fast) var(--ease-out); }
 .dirty { color: var(--warning); }
@@ -113,8 +113,8 @@
 .flow :global(.react-flow__edge:hover .react-flow__edge-textwrapper), .flow :global(.react-flow__edge.selected .react-flow__edge-textwrapper), .flow :global(.react-flow__edge.ce-hl .react-flow__edge-textwrapper) { display: block; }
 
 /* Khung sửa node */
-.form { display: grid; gap: 12px; }
-.fadeIn { animation: ce-fade var(--dur-base) var(--ease-out) both; }
+.form { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.fadeIn { min-width: 0; animation: ce-fade var(--dur-base) var(--ease-out) both; }
 .field { display: grid; gap: 5px; min-width: 0; }
 .field label { font: var(--text-caption); color: var(--text-secondary); }
 .two { display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
@@ -137,13 +137,17 @@
 .nodeLink:hover { text-decoration-color: currentColor; }
 .nodeLink:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-xs); }
 .tableTitle { text-decoration: none; max-width: 320px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (pointer: coarse) { .tableTitle { display: flex; align-items: center; } .tableTitle > * { min-width: 0; } }
 .nodeLinkOn { color: var(--volt); }
 .strategy { display: block; width: 100%; min-height: 76px; padding: 10px 12px; background: var(--bg-1); border: 1px solid var(--line-2); border-radius: var(--radius-s); color: var(--fg-1); font: var(--text-body-s); line-height: 1.55; resize: none; overflow: hidden; transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); }
 .strategy:focus { outline: none; border-color: var(--volt); box-shadow: var(--focus-ring); }
 
 /* Chạm thô: mục tiêu ≥ 44px */
 @media (pointer: coarse) {
-  .toolBtn { min-width: 40px; height: 40px; }
+  .toolBtn { min-width: 44px; height: 44px; }
+  .linkTo, .nodeLink { min-height: 44px; }
+  .linkTo { display: inline-flex; align-items: center; }
+  .tap.tap { height: 44px; }
   .iconBtn { width: 44px; height: 44px; }
   .input, .linkRow input { min-height: 44px; }
 }

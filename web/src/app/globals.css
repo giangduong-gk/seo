@@ -8,6 +8,7 @@
 @import '../styles/tokens/motion.css';
 @import '../styles/tokens/responsive.css';
 @import '../styles/tokens/themes.css';
+@import '../styles/tokens/app-overrides.css';
 @import '../styles/base.css';
 @import '../styles/motion.css';
 
@@ -108,3 +109,8 @@ html { scroll-padding-top: calc(var(--header-offset) + var(--subnav-h, 0px) + 16
 .btn-link:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .btn-link.primary { background: var(--volt-gradient); color: var(--on-volt); border-color: transparent; font-weight: 600; }
 .btn-link.primary:hover { background: var(--volt-gradient-hover); }
+
+/* Màn cảm ứng: nới vùng chạm của link chữ nhỏ (breadcrumb, eyebrow) lên ≥ 40px mà không đổi bố cục */
+@media (pointer: coarse) {
+  .crumbs > a, .micro a { display: inline-block; padding-block: 12px; margin-block: -12px; }
+}

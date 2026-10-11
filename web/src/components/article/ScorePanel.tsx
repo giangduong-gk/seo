@@ -49,7 +49,7 @@ function Reason({ text }: { text: string }) {
   return (
     <div className={s.reasonWrap}>
       <div ref={ref} className={["caption", s.reason, open ? s.reasonOpen : ""].join(" ")}>{text}</div>
-      {(clamped || open) && <button type="button" className={s.moreBtn} onClick={() => setOpen((o) => !o)} aria-expanded={open}>{open ? "Thu gọn" : "Xem thêm"}</button>}
+      {(clamped || open) && <button type="button" className={s.moreBtn} onClick={() => setOpen((o) => !o)}>{open ? "Thu gọn" : "Xem thêm"}</button>}
     </div>
   );
 }
@@ -69,7 +69,7 @@ function Criterion({ c, onFix, fixDisabled, fixing }: { c: ScoreCriterion; onFix
         {c.reason && <Reason text={c.reason} />}
         {c.status !== "pass" && c.fix && (
           <div className={s.critAction}>
-            <Button size="s" variant="secondary" iconLeft={<Wrench size={13} aria-hidden />} onClick={() => onFix(c)} loading={fixing} disabled={fixDisabled && !fixing} title={c.fix}>{fixing ? "Đang sửa…" : "Sửa"}</Button>
+            <Button size="s" variant="secondary" className={s.tap} iconLeft={<Wrench size={13} aria-hidden />} onClick={() => onFix(c)} loading={fixing} disabled={fixDisabled && !fixing} title={c.fix}>{fixing ? "Đang sửa…" : "Sửa"}</Button>
           </div>
         )}
       </div>
@@ -103,7 +103,7 @@ export function ScorePanel({ score, scoring, streaming, canGenerate, fixingId, o
   if (!score) {
     return (
       <Section title="Điểm SEO / GEO" sub="chưa chấm" defaultOpen>
-        <EmptyState icon={<Gauge size={22} />} title="Chưa chấm điểm" text="Rule engine chấm SEO ngay, không tốn token; bật AI để chấm thêm GEO / E-E-A-T." action={<Button size="s" variant="secondary" onClick={() => onScore(false)} loading={scoring} disabled={streaming}>Chấm ngay (rule)</Button>} />
+        <EmptyState icon={<Gauge size={22} />} title="Chưa chấm điểm" text="Rule engine chấm SEO ngay, không tốn token; bật AI để chấm thêm GEO / E-E-A-T." action={<Button size="s" variant="secondary" className={s.tap} onClick={() => onScore(false)} loading={scoring} disabled={streaming}>Chấm ngay (rule)</Button>} />
       </Section>
     );
   }

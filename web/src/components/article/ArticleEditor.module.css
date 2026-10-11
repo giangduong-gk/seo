@@ -141,11 +141,6 @@
 .split .prose h1 { font: var(--text-article-h2); font-size: clamp(22px, 1.2vw + 12px, 28px); margin-bottom: 16px; }
 .split .prose h2 { font-size: clamp(19px, 0.6vw + 13px, 22px); margin-top: 28px; }
 .split .prose h3 { font-size: 17px; }
-/* ≥900: cuộn trang dừng mềm ở vị trí toolbar chạm sub-nav → hai khung lấp đầy màn hình */
-@media (min-width: 900px) {
-  :global(html):has(.workspace) { scroll-snap-type: y proximity; }
-  .workspace { scroll-snap-align: start; scroll-margin-top: calc(var(--header-offset) + var(--subnav-h, 0px)); }
-}
 .incomingTag { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 
 /* Nút "Theo dõi" khi người dùng cuộn lên giữa lúc stream — dock dính đáy viewport, không bao giờ trôi khỏi màn hình */
@@ -319,7 +314,11 @@
 
 /* Chạm thô: mục tiêu ≥ 44px */
 @media (pointer: coarse) {
-  .tab { height: 40px; }
+  .tab { height: 44px; }
+  .chip { height: 44px; padding: 0 14px 0 16px; }
+  .chip::before, .moreBtn::before { content: none; }
+  .linkBtn, .inlineLink, .moreBtn { display: inline-flex; align-items: center; min-height: 44px; }
+  .tap.tap { height: 44px; }
   .menuBtn { min-height: 44px; min-width: 44px; }
   .menuItem { min-height: 44px; }
   .followPill { height: 44px; padding: 0 18px; }

@@ -7,8 +7,8 @@ import c from "@/components/content/content.module.css";
 import { hasApiKey } from "@/lib/claude";
 import { detectKeywordOverlap } from "@/lib/cluster";
 import { prisma } from "@/lib/db";
-import { ProjectHeader } from "../ProjectHeader";
-import { ClusterForm } from "./ClusterForm";
+import { ProjectHeader } from "../../ProjectHeader";
+import { ClusterForm } from "../ClusterForm";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;

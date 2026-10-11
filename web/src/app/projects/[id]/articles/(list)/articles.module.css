@@ -46,3 +46,6 @@
 .warning { background: var(--warning); }
 .danger { background: var(--danger); }
 .noScore { font: var(--text-caption); color: var(--fg-3); }
+
+/* Chạm thô: chip cao 44px */
+@media (pointer: coarse) { .chip { height: 44px; padding: 0 14px 0 16px; } .chip::before { content: none; } }

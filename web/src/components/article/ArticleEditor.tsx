@@ -529,7 +529,7 @@ export function ArticleEditor({ article, brief, revisions, initialScore, canGene
             <Section title="JSON-LD" sub={jsonLd ? "sinh từ bài + hồ sơ dự án" : "chưa có"}>
               {jsonLd ? (
                 <>
-                  <div><Button size="s" variant="secondary" onClick={copyJsonLd} iconLeft={copied ? <Check size={13} aria-hidden /> : <Copy size={13} aria-hidden />}>{copied ? "Đã copy" : "Copy"}</Button></div>
+                  <div><Button size="s" variant="secondary" className={s.tap} onClick={copyJsonLd} iconLeft={copied ? <Check size={13} aria-hidden /> : <Copy size={13} aria-hidden />}>{copied ? "Đã copy" : "Copy"}</Button></div>
                   <pre className={["mono", s.code].join(" ")}>{prettyJson(jsonLd)}</pre>
                 </>
               ) : <p className="caption">JSON-LD được sinh tự động sau khi Claude viết xong bài.</p>}
@@ -544,7 +544,7 @@ export function ArticleEditor({ article, brief, revisions, initialScore, canGene
                         <span className={s.revNote}>{r.note || "Phiên bản"}</span>
                         <span className="caption mono">{new Date(r.createdAt).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })} · {nf.format(wordCount(r.bodyMarkdown))} từ</span>
                       </span>
-                      <Button size="s" variant="ghost" iconLeft={<RotateCcw size={13} aria-hidden />} onClick={() => restore(r)} disabled={streaming || restoring}>Khôi phục</Button>
+                      <Button size="s" variant="ghost" className={s.tap} iconLeft={<RotateCcw size={13} aria-hidden />} onClick={() => restore(r)} disabled={streaming || restoring}>Khôi phục</Button>
                     </li>
                   ))}
                 </ul>
@@ -554,14 +554,14 @@ export function ArticleEditor({ article, brief, revisions, initialScore, canGene
             <form action={deleteArticle} onSubmit={(e) => { if (!window.confirm("Xoá bài viết này cùng toàn bộ phiên bản và điểm số?")) e.preventDefault(); }} className={s.deleteRow}>
               <input type="hidden" name="articleId" value={article.id} />
               <span className="caption">Cập nhật {new Date(article.updatedAt).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })}</span>
-              <Button type="submit" size="s" variant="ghost" className={s.dangerGhost} iconLeft={<Trash2 size={13} aria-hidden />} disabled={streaming}>Xoá bài</Button>
+              <Button type="submit" size="s" variant="ghost" className={[s.dangerGhost, s.tap].join(" ")} iconLeft={<Trash2 size={13} aria-hidden />} disabled={streaming}>Xoá bài</Button>
             </form>
           </aside>
         </div>
       </div>
 
       {/* ───── Thanh hành động dưới đáy (điện thoại) ───── */}
-      <div className={s.bottomBar} role="toolbar" aria-label="Hành động bài viết">
+      <div className={s.bottomBar} data-bottom-bar role="toolbar" aria-label="Hành động bài viết">
         {saveBtn(s.bottomBtn)}{writeBtn(s.bottomBtn)}{scoreBtn(s.bottomBtn)}
       </div>
     </div>

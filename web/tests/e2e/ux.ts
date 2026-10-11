@@ -121,6 +121,9 @@ function uxBrowserHelpers() {
       return t.length > n ? t.slice(0, n) + "…" : t;
     },
     visible(el) {
+      // nội dung của <details> đang đóng (trừ <summary>) bị ::details-content cắt về 0 nhưng vẫn có rect
+      const closed = el.closest("details:not([open])");
+      if (closed && !el.closest("summary")) return false;
       const r = el.getBoundingClientRect();
       if (r.width < 1 || r.height < 1) return false;
       const cs = getComputedStyle(el);
@@ -140,6 +143,24 @@ export async function installUxHelpers(page: Page) {
 /** Trang có nội dung "dài" đủ để cuộn ≥ n màn hình không. */
 export async function pageHeightInViewports(page: Page) {
   return page.evaluate(() => document.documentElement.scrollHeight / window.innerHeight);
+}
+
+/**
+ * page.evaluate chịu được một lần "Execution context was destroyed" (dev server Fast Refresh reload toàn trang khi
+ * file nguồn đổi trong lúc chạy — xảy ra khi các nhánh UI đang sửa code song song). Đợi load rồi thử lại một lần.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function evalRetry<R>(page: Page, fn: (arg: any) => R | Promise<R>, arg?: unknown): Promise<R> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const run = () => page.evaluate(fn as any, arg) as Promise<R>;
+  try {
+    return await run();
+  } catch (e) {
+    if (!/Execution context was destroyed|navigation/i.test(String(e))) throw e;
+    await page.waitForLoadState("load");
+    await page.waitForTimeout(1000);
+    return await run();
+  }
 }
 
 export const VIEWPORTS = [360, 768, 1024, 1440] as const;

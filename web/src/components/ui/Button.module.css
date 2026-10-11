@@ -3,7 +3,7 @@
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   height: var(--control-h-m); padding: 0 var(--control-pad-m);
   border-radius: var(--radius-button); border: 1px solid transparent;
-  font: 500 14px/1 var(--font-body); white-space: nowrap; cursor: pointer; user-select: none;
+  font: 500 14px/1 var(--font-body); white-space: nowrap; cursor: pointer; user-select: none; flex-shrink: 0; /* không co nhỏ hơn nhãn (tránh chữ tràn khỏi nút) */
   transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-instant) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
 }
 .btn:active:not(:disabled) { transform: scale(var(--press-scale)); }

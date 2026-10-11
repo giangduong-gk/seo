@@ -45,14 +45,14 @@ export function ClusterForm({ projectId, keywords, disabled }: { projectId: stri
             </button>
             {selected.size > 0 && !allVisibleSelected && <button type="button" className={s.link} onClick={() => setSelected(new Set())}>Bỏ chọn</button>}
           </div>
-          <div className={s.list}>
+          <div className={s.list} tabIndex={0} role="group" aria-label="Danh sách từ khoá">
             {keywords.map((k) => (
               // Hàng bị lọc vẫn nằm trong form (hidden) để từ khoá đã chọn vẫn được gửi
               <label key={k.id} className={s.item} hidden={!matches.has(k.id)}>
                 <input type="checkbox" name="keywordIds" value={k.id} checked={selected.has(k.id)} onChange={() => toggle(k.id)} />
                 <span className={s.term}>{k.term}</span>
                 {k.intent && <span className={s.badge}><IntentBadge intent={k.intent} /></span>}
-                {k.analyzed && <span className={s.dot} title="Đã phân tích" aria-label="Đã phân tích" />}
+                {k.analyzed && <span className={s.dot} role="img" title="Đã phân tích" aria-label="Đã phân tích" />}
               </label>
             ))}
             {matches.size === 0 && <p className={s.empty}>Không có từ khoá khớp “{q}”.</p>}

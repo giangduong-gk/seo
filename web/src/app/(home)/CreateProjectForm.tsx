@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Button, Input, Select, SystemNotice, Textarea } from "@/components/ui";
-import { createProject, type ActionState } from "./actions";
+import { createProject, type ActionState } from "@/app/actions";
 
 export function CreateProjectForm() {
   const [state, action, pending] = useActionState<ActionState, FormData>(createProject, undefined);

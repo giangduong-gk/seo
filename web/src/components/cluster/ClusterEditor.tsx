@@ -225,7 +225,7 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
         <div className={s.headText}>
           <div className="micro">Topic Cluster · {model}</div>
           <textarea
-            ref={titleRef} rows={1} className={["h1", s.titleInput].join(" ")} value={meta.pillarTitle} aria-label="Tiêu đề pillar" spellCheck={false}
+            ref={titleRef} rows={1} className={["h2", s.titleInput].join(" ")} value={meta.pillarTitle} aria-label="Tiêu đề pillar" spellCheck={false}
             onChange={(e) => { setMeta({ ...meta, pillarTitle: e.target.value.replace(/\s*\n+\s*/g, " ") }); markDirty(); }}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); e.currentTarget.blur(); } }}
           />
@@ -240,8 +240,8 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
       <div className={s.layout}>
         <div className={s.canvas}>
           <div className={s.toolbar} role="toolbar" aria-label="Công cụ sơ đồ">
-            <Button size="s" variant="secondary" iconLeft={<Plus size={14} aria-hidden />} onClick={() => addNode("cluster", "pillar")}>Thêm cluster</Button>
-            <Button size="s" variant="ghost" iconLeft={<Plus size={14} aria-hidden />} onClick={() => selected && addNode("supporting", selected.kind === "supporting" ? (selected.parentId ?? "pillar") : selected.id)} disabled={!selected || selected.kind === "pillar"} title={!selected || selected.kind === "pillar" ? "Chọn một node cluster trước" : undefined}>Thêm supporting</Button>
+            <Button size="s" variant="secondary" className={s.tap} iconLeft={<Plus size={14} aria-hidden />} onClick={() => addNode("cluster", "pillar")}>Thêm cluster</Button>
+            <Button size="s" variant="ghost" className={s.tap} iconLeft={<Plus size={14} aria-hidden />} onClick={() => selected && addNode("supporting", selected.kind === "supporting" ? (selected.parentId ?? "pillar") : selected.id)} disabled={!selected || selected.kind === "pillar"} title={!selected || selected.kind === "pillar" ? "Chọn một node cluster trước" : undefined}>Thêm supporting</Button>
             <span className={s.spacer} />
             <div className={s.viewTools}>
               <button type="button" className={s.toolBtn} onClick={() => void rf.zoomOut({ duration: dur(200) })} aria-label="Thu nhỏ" title="Thu nhỏ"><Minus size={15} /></button>
@@ -260,7 +260,7 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
               colorMode="dark" minZoom={0.2} maxZoom={1.8} proOptions={{ hideAttribution: true }}
             >
               <Background gap={24} size={1} color="rgba(255,255,255,0.06)" /> {/* lint-allow-color: React Flow nhận chuỗi màu */}
-              <MiniMap className={s.minimap} pannable zoomable style={{ width: 140, height: 100 }} /* lint-allow-color */ nodeColor={(n) => ((n as TopicNodeType).data?.node?.kind === "pillar" ? "#FFEA00" : "#6E737A")} maskColor="rgba(3,3,4,0.6)" />
+              <MiniMap className={s.minimap} pannable zoomable style={{ width: 140, height: 100 }} /* lint-allow-color */ nodeColor={(n) => ((n as TopicNodeType).data?.node?.kind === "pillar" ? "#FFEA00" : "#82878E")} maskColor="rgba(3,3,4,0.6)" />
               <FlowPanel position="bottom-left" className={s.legend}>
                 <span><i className={s.lgPillar} />Pillar</span><span><i className={s.lgCluster} />Cluster</span><span><i className={s.lgSupport} />Supporting</span>
                 <span className={s.legendHint}><Link2 size={12} aria-hidden /> kéo từ chấm dưới sang node khác để tạo link · <kbd>F</kbd> vừa khung · <kbd>Del</kbd> xoá · <kbd>Esc</kbd> bỏ chọn</span>
@@ -308,7 +308,7 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
                   <div className={s.briefBox}>
                     <div className="micro" style={{ marginBottom: 8 }}>Content Brief</div>
                     {existingBrief ? (
-                      <Link href={`/projects/${projectId}/briefs/${existingBrief}`}><Button size="s" variant="secondary" fullWidth>Xem brief đã tạo</Button></Link>
+                      <Link href={`/projects/${projectId}/briefs/${existingBrief}`}><Button size="s" variant="secondary" className={s.tap} fullWidth>Xem brief đã tạo</Button></Link>
                     ) : dirty ? (
                       <p className="caption">Lưu cluster trước khi tạo brief để brief dùng đúng bản đồ mới nhất.</p>
                     ) : (

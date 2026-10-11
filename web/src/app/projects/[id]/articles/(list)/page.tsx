@@ -6,8 +6,8 @@ import { hasApiKey } from "@/lib/claude";
 import { prisma } from "@/lib/db";
 import { wordCount } from "@/lib/markdown";
 import { STATUS_LABEL, scoreTone } from "@/components/article/status";
-import { ProjectHeader } from "../ProjectHeader";
-import { ArticleForm } from "./ArticleForm";
+import { ProjectHeader } from "../../ProjectHeader";
+import { ArticleForm } from "../ArticleForm";
 import c from "./articles.module.css";
 import { relTime } from "./relTime";
 

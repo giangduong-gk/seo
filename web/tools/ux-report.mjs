@@ -39,7 +39,7 @@ const lines = [];
 const suites = [...new Set(recs.map((r) => r.suite))].sort();
 let pass = 0, fail = 0, skip = 0;
 for (const r of recs) for (const c of Object.values(r.checks)) c.skipped ? skip++ : c.pass ? pass++ : fail++;
-lines.push(`# UX gate report`, "", `Nguồn: \`${path.relative(process.cwd(), dir)}\` · ${recs.length} bản ghi · check: **${pass} pass · ${fail} fail · ${skip} skip**`, "");
+lines.push(`# UX gate report`, "", `Nguồn: \`${dir.startsWith(process.cwd()) ? path.relative(process.cwd(), dir) : dir}\` · ${recs.length} bản ghi · check: **${pass} pass · ${fail} fail · ${skip} skip**`, "");
 lines.push("Ký hiệu: ✓ đạt · ✗ hỏng (kèm biến thể/viewport hỏng và số vấn đề) · – bỏ qua / chưa áp dụng · trống = không đo.", "");
 
 for (const suite of suites) {

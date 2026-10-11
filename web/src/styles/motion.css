@@ -89,3 +89,8 @@ details[open] > summary.disclosure::before { transform: rotate(45deg); }
   .stagger > *, .reveal, .grow-x { animation: none !important; }
   .row-link .row-arrow { transition: none; }
 }
+
+/* Thanh hành động dính đáy (editor trên điện thoại): toast và nút "lên đầu trang" nổi phía trên nó */
+@media (max-width: 899px) {
+  :root:has([data-bottom-bar]) { --fixed-bottom-offset: calc(var(--control-h-m) + 24px); }
+}
