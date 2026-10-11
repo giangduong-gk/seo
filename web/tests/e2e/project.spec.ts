@@ -31,7 +31,9 @@ test.describe("Trang dự án & phân tích", () => {
     // Chips
     const chips = page.getByRole("region", { name: "Từ khoá ngữ nghĩa" }).locator('span[class*="chip" i]');
     await expect.poll(() => chips.count()).toBeGreaterThanOrEqual(5);
-    await expect(page.getByRole("region", { name: "Thực thể & Schema" }).getByRole("table")).toBeVisible();
+    // desktop: bảng; điện thoại: danh sách thẻ (bảng ẩn theo media query)
+    const entities = page.getByRole("region", { name: "Thực thể & Schema" });
+    await expect(entities.getByRole("table").or(entities.getByRole("list")).filter({ visible: true }).first()).toBeVisible();
     await expect(page.getByRole("region", { name: "Checklist GEO / E-E-A-T" })).toBeVisible();
     await expect(page.getByRole("region", { name: "FAQ nháp" })).toBeVisible();
     // Nút tạo brief bị vô hiệu vì không có API key

@@ -113,4 +113,7 @@ html { scroll-padding-top: calc(var(--header-offset) + var(--subnav-h, 0px) + 16
 /* Màn cảm ứng: nới vùng chạm của link chữ nhỏ (breadcrumb, eyebrow) lên ≥ 40px mà không đổi bố cục */
 @media (pointer: coarse) {
   .crumbs > a, .micro a { display: inline-block; padding-block: 12px; margin-block: -12px; }
+  .crumbs > a { min-width: 40px; text-align: center; }
+  /* link-hành-động nhỏ (trong header panel, bảng): vùng chạm tối thiểu, căn giữa theo chiều dọc */
+  .tap-link { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; min-width: 40px; }
 }

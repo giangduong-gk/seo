@@ -211,7 +211,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
         </Panel>
 
         <Panel id="cluster" title="Gợi ý Topic Cluster" sub={`${r.cluster.clusters.length} bài`} className="reveal"
-          action={<Link href={`/projects/${a.projectId}/clusters`} className="caption" style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--fg-2)", minHeight: 32 }}>Xây cluster <ArrowRight size={14} aria-hidden /></Link>}>
+          action={<Link href={`/projects/${a.projectId}/clusters`} className="caption tap-link" style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "var(--fg-2)" }}>Xây cluster <ArrowRight size={14} aria-hidden /></Link>}>
           <div>
             <div className={c.groupLabel}>Pillar</div>
             <div style={{ fontWeight: 600, maxWidth: "var(--measure)" }}>{r.cluster.pillar}</div>

@@ -104,7 +104,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
             <KpiTile label="Từ khoá mục tiêu" value={<span style={{ font: "var(--text-h3)" }}>{r.targetKeyword}</span>} />
             <KpiTile label="Độ dài" value={<><span className={c.num}>{r.wordCountMin.toLocaleString("vi-VN")}–{r.wordCountMax.toLocaleString("vi-VN")}</span><small>từ</small></>} foot={outlineWords ? `outline ~${outlineWords.toLocaleString("vi-VN")} từ` : undefined} />
             <KpiTile label="Ý định" value={INTENT_LABEL[r.intent]?.label ?? r.intent} />
-            <KpiTile label="Outline" value={<><span className={c.num}>{r.outline.length}</span><small>mục</small></>} foot={`${h2Count} H2 · ${r.faq.length} FAQ`} />
+            <KpiTile label="Số mục outline" value={<><span className={c.num}>{r.outline.length}</span><small>mục</small></>} foot={`${h2Count} H2 · ${r.faq.length} FAQ`} />
           </div>
           <Panel title="Góc viết & định dạng" className="reveal">
             <dl className={c.dl}>

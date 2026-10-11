@@ -248,3 +248,5 @@
 }
 
 .num { font-variant-numeric: tabular-nums; }
+
+@media (pointer: coarse) { .competitor a { display: inline-block; padding-block: 9px; margin-block: -9px; } }

@@ -13,6 +13,8 @@ import { UX_PAGES, gotoUx, recordUx, settle } from "./ux";
  * - `nextjs-portal`: overlay/indicator của Next dev server — không có trong bản build production.
  * - `.react-flow__minimap`, `.react-flow__attribution`: SVG minimap và link "React Flow" do thư viện @xyflow/react render;
  *   app không kiểm soát markup bên trong. Node/edge/controls của React Flow VẪN được quét.
+ * - `scrollable-region-focusable` cho vùng cuộn `tabindex=0` nằm trong `fieldset[disabled]` (form khoá khi thiếu API key):
+ *   axe coi là không focus được nhưng trình duyệt vẫn focus được → kiểm tra thực tế bằng el.focus() rồi mới bỏ qua.
  */
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa"];
 const AXE_EXCLUDE = ["nextjs-portal", ".react-flow__minimap", ".react-flow__attribution"];
@@ -29,6 +31,28 @@ for (const p of UX_PAGES) {
     let builder = new AxeBuilder({ page }).withTags(AXE_TAGS);
     for (const sel of AXE_EXCLUDE) builder = builder.exclude(sel);
     const results = await builder.analyze();
+
+    // Dương tính giả đã kiểm chứng: axe-core 4.13 (`focusDisabled`) coi MỌI hậu duệ của `fieldset[disabled]` là không
+    // focus được, nhưng Chrome vẫn focus/cuộn được `div[tabindex=0]` bên trong (fieldset chỉ vô hiệu form control).
+    // Chỉ bỏ node `scrollable-region-focusable` nằm trong fieldset[disabled] VÀ thực sự nhận focus trong trình duyệt.
+    const falsePositives: string[] = [];
+    for (const v of results.violations.filter((x) => x.id === "scrollable-region-focusable")) {
+      const keep = [];
+      for (const n of v.nodes) {
+        const sel = n.target.join(" ");
+        const fp = await page.evaluate((q) => {
+          const el = document.querySelector(q) as HTMLElement | null;
+          if (!el || !el.closest("fieldset[disabled]")) return false;
+          el.focus();
+          const ok = document.activeElement === el;
+          el.blur();
+          return ok;
+        }, sel).catch(() => false);
+        if (fp) falsePositives.push(`${v.id}: ${sel} (trong fieldset[disabled], focus được)`); else keep.push(n);
+      }
+      v.nodes = keep;
+    }
+    results.violations = results.violations.filter((v) => v.nodes.length > 0);
 
     await testInfo.attach(`axe-${p.key}-${testInfo.project.name}.json`, { body: JSON.stringify(results, null, 2), contentType: "application/json" });
 
@@ -47,7 +71,7 @@ for (const p of UX_PAGES) {
       suite: "a11y", page: p.key, pageName: p.name, variant: testInfo.project.name, url,
       checks: {
         "serious+critical": { pass: blocking.length === 0, items: blocking },
-        "moderate+minor (không chặn)": { pass: true, items: nonBlocking },
+        "moderate+minor (không chặn)": { pass: true, items: nonBlocking, info: falsePositives.length ? { axeFalsePositivesIgnored: falsePositives } : undefined },
       },
     });
 

@@ -63,12 +63,12 @@ Cấu hình: `playwright.config.ts`
 | Spec | Kiểm tra |
 | --- | --- |
 | `home.spec.ts` | Wordmark **SEO** Studio, danh sách dự án seed, thông báo API key; tạo dự án qua form → trang dự án; validate tên ngắn |
-| `project.spec.ts` | Header/sub-nav, form phân tích bị vô hiệu, lịch sử phân tích; trang phân tích: 4 KPI panel, ≥ 5 chip, bảng thực thể, checklist GEO; 404 |
+| `project.spec.ts` | Header/sub-nav, form phân tích bị vô hiệu, lịch sử phân tích; trang phân tích: hàng KPI "Tổng quan" (Ý định · Khối lượng · Độ khó · Nguồn dữ liệu), panel "Ý định & góc viết" (Định dạng đề xuất, Đối tượng), ≥ 5 chip, thực thể (bảng trên desktop / danh sách thẻ trên phone), checklist GEO; 404 thật |
 | `clusters.spec.ts` | Danh sách cluster + cannibalization; editor `.react-flow__node` ≥ 5, `.react-flow__edge` ≥ 5; chọn node → panel thuộc tính; sửa → "Chưa lưu thay đổi" (desktop) |
-| `briefs.spec.ts` | Danh sách brief; trang brief (outline, E-E-A-T, schema, FAQ, link tải .md); API `/api/briefs/demo-brief/markdown` → `# Content Brief`, `?download=1`, 404 |
-| `usage.spec.ts` | Trang Chi phí AI: KPI + 2 bảng |
+| `briefs.spec.ts` | Danh sách brief; trang brief (panel `section#outline` — region tên "Outline" đang trùng với ô KPI, bắt bởi gate landmark trong a11y.spec — E-E-A-T, schema, FAQ, link tải .md); API `/api/briefs/demo-brief/markdown` → `# Content Brief`, `?download=1`, 404 |
+| `usage.spec.ts` | Trang Chi phí AI: 4 ô KPI `<Stat>` trong `.grid-kpi` (tổng chi phí, lần gọi, token, cache hit), biểu đồ "Chi phí theo tính năng", 2 bảng (nhãn tính năng đã Việt hoá: "Phân tích từ khoá") |
 | `articles.spec.ts` | Sprint 3 — skip nếu route 404: danh sách bài viết, form bị vô hiệu, 404 bài không tồn tại |
-| `a11y.spec.ts` | **UX gate** — axe-core WCAG 2.0 A/AA + 2.1 AA, 10 trang × 2 project (xem mục 3a) |
+| `a11y.spec.ts` | **UX gate** — axe-core WCAG 2.0 A/AA + 2.1 AA, 10 trang × 2 project; tên landmark duy nhất (xem mục 3a) |
 | `layout.spec.ts` | **UX gate** — 10 trang × 4 viewport (360/768/1024/1440): status 200, có H1, tràn ngang trang/phần tử, H1 bị cắt, sticky đè heading, CLS; vùng chạm trên phone (mục 3a) |
 | `motion.spec.ts` | **UX gate** — reduced-motion, smooth scroll, TOC neo dưới header, NavProgress, BackToTop, vùng toast |
 | `keyboard.spec.ts` | **UX gate** — Tab đầu tiên tới skip link/nav, focus nhìn thấy, Escape đóng menu, Ctrl+S trong editor |
@@ -82,6 +82,8 @@ Hạ tầng chung `tests/e2e/ux.ts`: `UX_PAGES` (10 trang: trang chủ, dự án
 | --- | --- | --- | --- |
 | a11y | axe `wcag2a`, `wcag2aa`, `wcag21aa` | **fail** khi `serious`/`critical`; `moderate`/`minor` chỉ log + ghi báo cáo | serious/critical chặn người dùng thật (tương phản, nhãn thiếu, ARIA sai); moderate thường là vấn đề cấu trúc nên sửa dần. Chạy với reduced-motion để animation vào trang không làm sai phép đo tương phản. Báo cáo axe đầy đủ: attachment `axe-<trang>-<project>.json`. |
 | a11y | loại trừ | `nextjs-portal`, `.react-flow__minimap`, `.react-flow__attribution` | overlay dev của Next (không có ở production) và markup nội bộ @xyflow/react mà app không kiểm soát; node/edge/controls React Flow vẫn được quét |
+| a11y | dương tính giả axe đã kiểm chứng | bỏ node `scrollable-region-focusable` nằm trong `fieldset[disabled]` **và** `el.focus()` thành công (ghi vào `info.axeFalsePositivesIgnored`) | axe-core 4.13 `focusDisabled()` coi mọi hậu duệ fieldset bị khoá là không focus được, nhưng trình duyệt vẫn focus `div[tabindex=0]` (vd. `.ClusterForm_list` khi form khoá vì thiếu API key) |
+| a11y | tên landmark duy nhất (chromium) | không có hai `section/nav/aside/form/[role=region…]` cùng role + cùng tên hiển thị | axe `landmark-unique` thuộc best-practice nên không nằm trong bộ tag WCAG; hai region trùng tên khiến danh sách landmark của trình đọc màn hình mơ hồ |
 | layout (a) | tràn ngang trang | `scrollWidth ≤ innerWidth` | cuộn ngang toàn trang là lỗi bố cục rõ nhất trên mobile; báo phần tử ngoài cùng lòi khỏi viewport |
 | layout (b) | phần tử tràn hộp | `scrollWidth ≤ clientWidth + 1` trừ `overflow-x: auto/scroll`, `text-overflow: ellipsis`, sr-only, React Flow; chỉ tính tràn do con **trong luồng** hoặc text (bỏ qua trang trí `position:absolute` như mũi tên `::after`); báo phần tử sâu nhất + con gây tràn | bắt nút/nhãn/bảng bị đẩy ra ngoài card trước khi nó thành tràn trang |
 | layout (c) | H1 bị cắt | không ellipsis / line-clamp nào thực sự cắt chữ trong `h1` | tiêu đề trang phải đọc được đầy đủ |

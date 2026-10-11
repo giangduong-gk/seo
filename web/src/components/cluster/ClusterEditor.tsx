@@ -364,7 +364,7 @@ function Editor({ projectId, clusterId, initial, model, canGenerate, briefsByKey
               <Badge key="i" tone="outline">{n.intent}</Badge>,
               n.kind,
               <Badge key="p" tone={n.priority === "high" ? "new" : "outline"}>{n.priority}</Badge>,
-              briefsByKeyword[n.targetKeyword.toLowerCase()] ? <Link key="b" href={`/projects/${projectId}/briefs/${briefsByKeyword[n.targetKeyword.toLowerCase()]}`} style={{ textDecoration: "underline" }}>Xem</Link> : <span key="b" className="muted">—</span>,
+              briefsByKeyword[n.targetKeyword.toLowerCase()] ? <Link key="b" href={`/projects/${projectId}/briefs/${briefsByKeyword[n.targetKeyword.toLowerCase()]}`} className="tap-link" style={{ textDecoration: "underline" }}>Xem</Link> : <span key="b" className="muted">—</span>,
             ])} />
           </Panel>
         </div>
