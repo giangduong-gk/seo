@@ -92,7 +92,7 @@
 .pillar .kind { color: var(--volt); }
 .pillar .kindDot { background: var(--volt); }
 .supporting .kindDot { background: transparent; box-shadow: inset 0 0 0 1px var(--fg-3); }
-.kids { color: var(--fg-3); letter-spacing: 0; }
+.kids { color: var(--fg-2); letter-spacing: 0; } /* fg-3 trên nền pillar (bg-3) < 4.5:1 */
 .title { font: 600 13px/1.3 var(--font-body); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .kw { font: var(--text-mono); color: var(--fg-2); margin-top: auto; padding-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .meta { display: flex; gap: 6px; margin-top: 6px; align-items: center; flex-wrap: nowrap; overflow: hidden; }
