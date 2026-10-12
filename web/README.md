@@ -1,15 +1,28 @@
 # SEO Studio — web
 
-Next.js 15 + TypeScript · Anthropic SDK · Prisma (SQLite dev) · AiDoIt Design System tokens.
+Next.js 15 + TypeScript · Anthropic SDK · Prisma + PostgreSQL (Supabase ở production, Postgres cục bộ khi dev/test) · AiDoIt Design System tokens.
 
 ## Chạy local
 ```bash
 cd web
-cp .env.example .env        # điền ANTHROPIC_API_KEY
+cp .env.example .env        # điền ANTHROPIC_API_KEY, DATABASE_URL, DIRECT_URL
 npm install
-npx prisma db push          # tạo prisma/dev.db
+npx prisma migrate deploy   # tạo schema `seo` + bảng (RLS bật sẵn)
+node prisma/seed.mjs        # (tuỳ chọn) dữ liệu demo
 npm run dev                 # http://localhost:3000
 ```
+
+Postgres cục bộ nhanh nhất: `docker run -d -p 5432:5432 -e POSTGRES_USER=seo -e POSTGRES_PASSWORD=seo -e POSTGRES_DB=seo_dev postgres:16`
+(thêm database `seo_test` cho e2e: `createdb -h localhost -U seo seo_test`).
+
+## Database (Supabase)
+- Bảng nằm trong schema riêng **`seo`** (`?schema=seo` trong URL), không nằm ở `public` → không bị Data API (PostgREST) phơi ra.
+- **RLS bật trên mọi bảng, không có policy** + thu hồi mọi quyền của `anon`/`authenticated` (migration `20261011043442_init`):
+  key công khai không đọc/ghi được gì. App truy cập qua Prisma bằng role chủ bảng ở server.
+- Runtime dùng **Supavisor transaction pooler** (cổng 6543, `pgbouncer=true&connection_limit=1`); migration dùng `DIRECT_URL` (cổng 5432).
+- Đổi schema: sửa `prisma/schema.prisma` → `npx prisma migrate dev --name <ten>` (trên DB cục bộ) → commit thư mục migration →
+  `npx prisma migrate deploy` với URL Supabase. Không dùng `db push` trên production.
+- Chuyển dữ liệu từ DB cũ: xuất JSON rồi `DATABASE_URL=... node prisma/scripts/import-json.mjs <file.json>` (theo thứ tự khoá ngoại, bỏ qua bản ghi trùng).
 
 ## Cấu trúc
 ```

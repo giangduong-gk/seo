@@ -6,10 +6,9 @@ import { GOOD_ARTICLE, GOOD_KEYWORD, GOOD_META, GOOD_SLUG, GOOD_TITLE } from "..
 import { DEMO } from "./fixtures";
 
 /**
- * Chuẩn bị DB SQLite riêng cho e2e: prisma/test.db (đường dẫn tuyệt đối — xem playwright.config.ts).
- * 1. `prisma db push` — tạo file/đồng bộ schema (idempotent).
- * 2. `reset-db.mjs` — xoá dữ liệu cũ nhưng GIỮ NGUYÊN FILE: Playwright khởi động webServer TRƯỚC globalSetup,
- *    dev server có thể đã mở file; xoá file lúc này sẽ gây "attempt to write a readonly database" (SQLITE_READONLY_DBMOVED).
+ * Chuẩn bị DB Postgres riêng cho e2e (`seo_test`, schema `seo` — xem playwright.config.ts).
+ * 1. `prisma migrate deploy` — áp đúng các migration trong prisma/migrations (giống production/Supabase, idempotent).
+ * 2. `reset-db.mjs` — xoá dữ liệu cũ (giữ schema; dev server có thể đã kết nối vì Playwright khởi động webServer TRƯỚC globalSetup).
  * 3. `prisma/seed.mjs` — dữ liệu demo (demo-project / demo-cluster / demo-brief).
  * 4. Bổ sung cho bộ UX gate: bài viết `demo-article` (nội dung dài từ fixture unit) để có trang editor bài viết,
  *    và đưa id phân tích seed (cuid ngẫu nhiên) vào `process.env.E2E_ANALYSIS_ID` — worker kế thừa env của globalSetup.
@@ -17,10 +16,10 @@ import { DEMO } from "./fixtures";
  */
 export default async function globalSetup() {
   const root = path.resolve(__dirname, "..", "..");
-  const env = { ...process.env, DATABASE_URL: E2E_DATABASE_URL, ANTHROPIC_API_KEY: "" };
+  const env = { ...process.env, DATABASE_URL: E2E_DATABASE_URL, DIRECT_URL: E2E_DATABASE_URL, ANTHROPIC_API_KEY: "" };
   const opts = { cwd: root, env, stdio: "inherit" as const };
   const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-  execFileSync(npx, ["prisma", "db", "push", "--skip-generate", "--accept-data-loss"], opts);
+  execFileSync(npx, ["prisma", "migrate", "deploy"], opts);
   execFileSync(process.execPath, ["tests/e2e/reset-db.mjs"], opts);
   execFileSync(process.execPath, ["prisma/seed.mjs"], opts);
 

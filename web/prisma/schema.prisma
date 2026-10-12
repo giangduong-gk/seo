@@ -1,12 +1,15 @@
-// Sprint 1 dùng SQLite để chạy ngay không cần dịch vụ ngoài.
-// Production: đổi provider thành "postgresql" và cập nhật DATABASE_URL (xem docs/PLAN.md).
+// PostgreSQL (Supabase ở production, Postgres cục bộ cho dev/test).
+// Bảng nằm trong schema riêng (`?schema=seo` trong URL) — KHÔNG phải `public` mà Supabase Data API công khai.
+//   DATABASE_URL: runtime. Supabase → Supavisor transaction pooler (cổng 6543) + `pgbouncer=true`.
+//   DIRECT_URL:   migration (kết nối trực tiếp / session pooler cổng 5432).
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Project {
@@ -16,9 +19,9 @@ model Project {
   industry      String?
   locale        String     @default("vi-VN")
   brandVoice    String?
-  entityProfile String?    // JSON: tên doanh nghiệp, sản phẩm, tác giả, sameAs...
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  entityProfile String? // JSON: tên doanh nghiệp, sản phẩm, tác giả, sameAs...
+  createdAt     DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime   @updatedAt @db.Timestamptz(3)
   keywords      Keyword[]
   analyses      Analysis[]
   usage         AiUsage[]
@@ -34,7 +37,7 @@ model Keyword {
   term      String
   intent    String?
   source    String     @default("manual")
-  createdAt DateTime   @default(now())
+  createdAt DateTime   @default(now()) @db.Timestamptz(3)
   analyses  Analysis[]
 
   @@unique([projectId, term])
@@ -48,24 +51,29 @@ model Analysis {
   keyword   Keyword  @relation(fields: [keywordId], references: [id], onDelete: Cascade)
   status    String   @default("done") // done | failed | refused
   model     String
-  research  String?  // ghi chú SERP (text) nếu bật web search
-  result    String?  // JSON KeywordAnalysis
+  research  String? // ghi chú SERP (text) nếu bật web search
+  result    String? // JSON KeywordAnalysis
   error     String?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([projectId, createdAt])
+  @@index([keywordId])
 }
 
 model AiUsage {
-  id              String   @id @default(cuid())
-  projectId       String?
-  project         Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  feature         String
-  model           String
-  inputTokens     Int
-  outputTokens    Int
-  cacheReadTokens Int      @default(0)
-  cacheWriteTokens Int     @default(0)
-  costUsd         Float
-  createdAt       DateTime @default(now())
+  id               String   @id @default(cuid())
+  projectId        String?
+  project          Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  feature          String
+  model            String
+  inputTokens      Int
+  outputTokens     Int
+  cacheReadTokens  Int      @default(0)
+  cacheWriteTokens Int      @default(0)
+  costUsd          Float
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([projectId, createdAt])
 }
 
 model Cluster {
@@ -75,44 +83,52 @@ model Cluster {
   title         String
   pillarKeyword String
   model         String
-  data          String   // JSON ClusterMap (kèm vị trí node đã kéo)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  data          String // JSON ClusterMap (kèm vị trí node đã kéo)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
   briefs        Brief[]
+
+  @@index([projectId, createdAt])
 }
 
 model Brief {
-  id            String   @id @default(cuid())
-  projectId     String
-  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  clusterId     String?
-  cluster       Cluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
-  targetKeyword String
-  title         String
-  model         String
-  data          String   // JSON ContentBrief
-  createdAt     DateTime @default(now())
-  articles      Article[]
-}
-
-model Article {
   id            String    @id @default(cuid())
   projectId     String
   project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  briefId       String?
-  brief         Brief?    @relation(fields: [briefId], references: [id], onDelete: SetNull)
+  clusterId     String?
+  cluster       Cluster?  @relation(fields: [clusterId], references: [id], onDelete: SetNull)
   targetKeyword String
   title         String
-  slug          String
-  metaDescription String  @default("")
-  bodyMarkdown  String    @default("")
-  jsonLd        String?   // JSON-LD sinh bằng code từ bài + hồ sơ dự án
-  status        String    @default("draft") // draft | writing | review | final
   model         String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  revisions     ArticleRevision[]
-  scores        Score[]
+  data          String // JSON ContentBrief
+  createdAt     DateTime  @default(now()) @db.Timestamptz(3)
+  articles      Article[]
+
+  @@index([projectId, createdAt])
+  @@index([clusterId])
+}
+
+model Article {
+  id              String            @id @default(cuid())
+  projectId       String
+  project         Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  briefId         String?
+  brief           Brief?            @relation(fields: [briefId], references: [id], onDelete: SetNull)
+  targetKeyword   String
+  title           String
+  slug            String
+  metaDescription String            @default("")
+  bodyMarkdown    String            @default("")
+  jsonLd          String? // JSON-LD sinh bằng code từ bài + hồ sơ dự án
+  status          String            @default("draft") // draft | writing | review | final
+  model           String
+  createdAt       DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime          @updatedAt @db.Timestamptz(3)
+  revisions       ArticleRevision[]
+  scores          Score[]
+
+  @@index([projectId, updatedAt])
+  @@index([briefId])
 }
 
 model ArticleRevision {
@@ -121,7 +137,9 @@ model ArticleRevision {
   article      Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   bodyMarkdown String
   note         String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([articleId, createdAt])
 }
 
 model Score {
@@ -130,7 +148,9 @@ model Score {
   article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   seoScore  Int
   geoScore  Int
-  criteria  String   // JSON ScoreCriterion[]
+  criteria  String // JSON ScoreCriterion[]
   model     String?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([articleId, createdAt])
 }

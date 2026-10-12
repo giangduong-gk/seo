@@ -1,10 +1,9 @@
 import { existsSync } from "node:fs";
-import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
  * E2E smoke + UX gates — chạy dev server riêng trên cổng 3500 (distDir `.next-qa` qua NEXT_DIST_DIR để không đụng
- * các dev server khác đang chạy song song trên cùng repo, vd. `.next-b1` ở cổng 3401) với DB SQLite riêng (prisma/test.db, đường dẫn tuyệt đối) và KHÔNG có API key
+ * các dev server khác đang chạy song song trên cùng repo, vd. `.next-b1` ở cổng 3401) với DB Postgres riêng (`seo_test`, schema `seo`) và KHÔNG có API key
  * (UI hiển thị thông báo vàng, nút sinh nội dung bị vô hiệu → không gọi Claude thật).
  *
  * Lưu ý env: `@next/env` chụp process.env lúc khởi động và không cho .env ghi đè khoá đã có mặt — kể cả chuỗi rỗng —
@@ -14,11 +13,10 @@ const PORT = Number(process.env.E2E_PORT || 3500);
 const BASE_URL = `http://localhost:${PORT}`;
 
 /**
- * DB e2e dùng ĐƯỜNG DẪN TUYỆT ĐỐI: Prisma resolve `file:./x.db` theo thư mục schema được "nướng" vào client lúc
- * `prisma generate` — nếu client bị generate lại từ một bản copy của dự án, đường dẫn tương đối sẽ trỏ sai chỗ.
+ * DB e2e: Postgres cục bộ (hoặc service `postgres:16` trên CI), database riêng `seo_test` — KHÔNG bao giờ trỏ vào Supabase
+ * vì globalSetup xoá sạch dữ liệu. Đổi bằng `E2E_DATABASE_URL`. Không qua pooler nên dùng chung URL cho DIRECT_URL.
  */
-export const E2E_DB_PATH = path.resolve(__dirname, "prisma", "test.db");
-export const E2E_DATABASE_URL = `file:${E2E_DB_PATH}`;
+export const E2E_DATABASE_URL = process.env.E2E_DATABASE_URL || "postgresql://seo:seo@localhost:5432/seo_test?schema=seo";
 
 // Máy dev/CI nội bộ có sẵn Chromium tại đây (PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1). Trên CI công khai dùng `npx playwright install chromium`.
 const LOCAL_CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -51,6 +49,7 @@ export default defineConfig({
     env: {
       NEXT_DIST_DIR: process.env.E2E_DIST_DIR || ".next-qa",
       DATABASE_URL: E2E_DATABASE_URL,
+      DIRECT_URL: E2E_DATABASE_URL,
       ANTHROPIC_API_KEY: "",
       ENABLE_WEB_SEARCH: "false",
       NEXT_TELEMETRY_DISABLED: "1",

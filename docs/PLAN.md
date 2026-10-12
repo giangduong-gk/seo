@@ -230,6 +230,15 @@ Source(id, articleId, url, title, accessedAt, quote)
 
 Mốc MVP dùng được nội bộ: **cuối giai đoạn 3**.
 
+### 5.1 Hạ tầng Supabase (sau Sprint 3)
+
+| Bước | Trạng thái | Nội dung |
+|---|---|---|
+| **1. Database** | ✅ Xong (12/10/2026) | Prisma chuyển SQLite → PostgreSQL, schema riêng `seo`, migration `20261011043442_init` (index theo dự án/thời gian, `timestamptz`), **RLS bật trên mọi bảng, không policy, thu hồi quyền `anon`/`authenticated`**; dữ liệu cũ chép sang Supabase (52 bản ghi, đối chiếu md5 từng dòng); e2e/CI chạy trên Postgres `seo_test` |
+| 2. Auth & quyền | Chờ duyệt | Supabase Auth (Google + magic link), thành viên/vai trò theo dự án, giới hạn chi phí AI theo dự án |
+| 3. Deploy | Chờ duyệt | Vercel + Supabase (pooler 6543 cho runtime, `prisma migrate deploy` trong pipeline) |
+| 4. Mở rộng | Chờ duyệt | pgvector (tìm bài trùng ý định), hàng đợi pgmq cho tác vụ AI dài |
+
 ---
 
 ## 6. Rủi ro & cách giảm thiểu

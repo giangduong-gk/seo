@@ -7,11 +7,12 @@ Tài liệu này mô tả hạ tầng kiểm thử (unit · e2e · lint token), 
 ```bash
 cd web
 npm ci && npx prisma generate
+# e2e cần Postgres cục bộ có database `seo_test` (mặc định postgresql://seo:seo@localhost:5432/seo_test?schema=seo, đổi bằng E2E_DATABASE_URL)
 
 npm run typecheck     # tsc --noEmit (bao gồm cả tests/)
 npm test              # Vitest — unit tests trong tests/unit/**
 npm run test:watch    # Vitest watch
-npm run test:e2e      # Playwright — TẤT CẢ spec (smoke + UX gate); dev server riêng cổng 3500, distDir .next-qa, DB prisma/test.db, KHÔNG có API key
+npm run test:e2e      # Playwright — TẤT CẢ spec (smoke + UX gate); dev server riêng cổng 3500, distDir .next-qa, DB Postgres `seo_test`, KHÔNG có API key
 npm run test:e2e:ux   # chỉ 5 bộ UX gate (a11y · layout · motion · keyboard · visual)
 npm run ux:report     # gộp test-results/ux-report/*.json → bảng Markdown trang × check (stdout; thêm đường dẫn để ghi file)
 npm run lint:tokens   # báo màu hard-code ngoài src/styles/tokens (exit 1 nếu có)
@@ -24,7 +25,7 @@ npx playwright test tests/e2e/layout.spec.ts --project=phone      # chỉ kiểm
 npx playwright show-report                                        # (CI) xem HTML report + ảnh/JSON đính kèm
 ```
 
-CI (`.github/workflows/ci.yml`): Node 22 → `npm ci` → `prisma generate` → `typecheck` → `npm test` → `npm run build` → `lint:tokens` (bắt buộc) → job e2e (timeout 50 phút) `npm ci` (cài cả `@axe-core/playwright` ghim trong lockfile) → cài Chromium bằng `npx playwright install --with-deps chromium` → `npm run test:e2e` (mọi spec, gồm UX gate) → **luôn** chạy `tools/ux-report.mjs` và ghi bảng trang × check vào Job Summary → **luôn** upload `playwright-report` + `test-results` (ảnh baseline `test-results/visual/`, `ux-report/*.json`, trace khi fail).
+CI (`.github/workflows/ci.yml`): service `postgres:16` (database `seo_test`) cho job e2e; Node 22 → `npm ci` → `prisma generate` → `typecheck` → `npm test` → `npm run build` → `lint:tokens` (bắt buộc) → job e2e (timeout 50 phút) `npm ci` (cài cả `@axe-core/playwright` ghim trong lockfile) → cài Chromium bằng `npx playwright install --with-deps chromium` → `npm run test:e2e` (mọi spec, gồm UX gate) → **luôn** chạy `tools/ux-report.mjs` và ghi bảng trang × check vào Job Summary → **luôn** upload `playwright-report` + `test-results` (ảnh baseline `test-results/visual/`, `ux-report/*.json`, trace khi fail).
 
 ## 2. Unit tests (Vitest)
 
@@ -46,18 +47,16 @@ Module Sprint 3 (`scorer.ts`, `jsonld.ts`) được import qua `tests/unit/_help
 ## 3. E2E smoke (Playwright Test)
 
 Cấu hình: `playwright.config.ts`
-- `webServer`: `npm run dev -- -p 3500`, `reuseExistingServer: true`, timeout 180 s, env `NEXT_DIST_DIR=.next-qa` (đổi bằng `E2E_DIST_DIR`), `DATABASE_URL=file:<abs>/web/prisma/test.db` (hằng `E2E_DATABASE_URL` trong config), `ANTHROPIC_API_KEY=""`.
+- `webServer`: `npm run dev -- -p 3500`, `reuseExistingServer: true`, timeout 180 s, env `NEXT_DIST_DIR=.next-qa` (đổi bằng `E2E_DIST_DIR`), `DATABASE_URL`/`DIRECT_URL` = Postgres `seo_test` schema `seo` (hằng `E2E_DATABASE_URL` trong config, đổi bằng biến cùng tên), `ANTHROPIC_API_KEY=""`.
   `next.config.ts` đọc `distDir` từ `NEXT_DIST_DIR` → nhiều dev server chạy song song trên cùng repo không ghi đè `.next` của nhau (các nhánh UI dùng `.next-b1/.next-b2/.next-c` ở cổng 3401–3403; e2e luôn là `.next-qa` ở 3500). Lưu ý: `next dev` tự thêm `<distDir>/types/**/*.ts` vào `tsconfig.json#include`.
-- `globalSetup` (`tests/e2e/global-setup.ts`): `prisma db push --skip-generate` (tạo file nếu chưa có) → `tests/e2e/reset-db.mjs` (xoá dữ liệu, **giữ nguyên file**) → `node prisma/seed.mjs` → tạo bài viết `demo-article` (nội dung ~900 từ từ `tests/unit/fixtures/sample-article.ts`, ảnh thay bằng SVG data URI) để có trang editor bài viết, và đặt `process.env.E2E_ANALYSIS_ID` (id phân tích seed là cuid ngẫu nhiên) cho worker — cùng env.
-  Không xoá file DB vì Playwright khởi động `webServer` *trước* `globalSetup`: server đã mở file, xoá/tạo lại sẽ gây `SQLITE_READONLY_DBMOVED` ("attempt to write a readonly database").
+- `globalSetup` (`tests/e2e/global-setup.ts`): `prisma migrate deploy` (đúng các migration sẽ chạy trên Supabase, gồm RLS) → `tests/e2e/reset-db.mjs` (xoá dữ liệu; **từ chối chạy** nếu `DATABASE_URL` không trỏ vào database `seo_test`) → `node prisma/seed.mjs` → tạo bài viết `demo-article` (nội dung ~900 từ từ `tests/unit/fixtures/sample-article.ts`, ảnh thay bằng SVG data URI) để có trang editor bài viết, và đặt `process.env.E2E_ANALYSIS_ID` (id phân tích seed là cuid ngẫu nhiên) cho worker — cùng env.
 - 2 project: `chromium` (Desktop Chrome) và `phone` (390×844, isMobile, touch, UA iPhone 13 — chạy bằng Chromium, không tải WebKit).
 - Chromium: dùng `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` nếu tồn tại (hoặc `PW_CHROME_PATH`), ngược lại dùng browser Playwright cài (CI).
 - Fixture `tests/e2e/fixtures.ts` tự động cho mọi test: gom `pageerror` + `console.error` (bỏ qua favicon/React DevTools), sau mỗi test kiểm tra không lỗi và `document.documentElement.scrollWidth <= innerWidth`.
 
 **Ghi chú env đã kiểm chứng**
 - `@next/env` chụp `process.env` lúc khởi động và **không cho `.env` ghi đè khoá đã có** — kể cả giá trị rỗng. Vì vậy `ANTHROPIC_API_KEY=""` truyền qua `webServer.env` thắng khoá thật trong `web/.env` → UI hiện thông báo vàng, nút sinh nội dung bị vô hiệu, không có cuộc gọi Claude nào.
-- Prisma CLI/Client cũng ưu tiên `process.env`; `dev.db` không bị động tới.
-- **Dùng đường dẫn tuyệt đối cho DB e2e.** Client Prisma resolve `file:./x.db` theo thư mục schema được "nướng" vào `node_modules/.prisma` lúc `prisma generate`. Trong sprint này đã gặp sự cố: một bản copy của dự án (`…/scratchpad/webbuild`, `node_modules` là symlink về `web/node_modules`) chạy `prisma generate` → mọi `file:./…` trong `web` trỏ sang `webbuild/prisma/…` ("table Project does not exist"). Khắc phục: `cd web && npx prisma generate`; e2e không còn bị ảnh hưởng vì dùng đường dẫn tuyệt đối, nhưng `dev.db` của server dev (`file:./dev.db`) vẫn có thể bị lệch — không `prisma generate` từ bản copy dùng chung `node_modules`.
+- Prisma CLI/Client cũng ưu tiên `process.env`; database dev (`seo_dev`) không bị động tới.
 - Nếu đã có server khác ở cổng 3500 (`reuseExistingServer`), test sẽ dùng DB của server đó — hãy tắt nó hoặc đặt `E2E_PORT`.
 
 | Spec | Kiểm tra |
@@ -145,7 +144,7 @@ Khi lint đã sạch ổn định, bỏ `continue-on-error` trong CI để lint 
 ## 6. Khoảng trống đã biết
 - Chưa có test cho đường đi gọi Claude thật (`analyze.ts`, `cluster.ts`, `generateBrief`, `writer.ts`, `runAiChecks`) — cần mock SDK hoặc fixture ghi lại; hiện chỉ test phần thuần hàm.
 - E2E không kiểm tra stream SSE của Writer và luồng sửa/chấm AI (cần API key hoặc server mock).
-- Server actions (`actions.ts`, `article-actions.ts`) chưa có test tích hợp với Prisma (có thể chạy trên `test.db` trong tương lai).
+- Server actions (`actions.ts`, `article-actions.ts`) chưa có test tích hợp với Prisma (có thể chạy trên database `seo_test` trong tương lai).
 - E2E dùng dev server (biên dịch chậm, có thể flaky lần đầu); CI nên cân nhắc `next build && next start -p 3500` để ổn định hơn.
 - UX gate chưa tự động hoá: độ "mượt" cảm nhận của animation (easing/thời lượng chỉ đo gián tiếp qua token), tỉ lệ/khoảng trắng "hợp lý" (cần review ảnh `test-results/visual/`), kéo-thả/pinch trên React Flow bằng cảm ứng, đọc bằng screen reader thật (axe chỉ kiểm tra tĩnh), hiệu năng cuộn (FPS/long task) và CLS khi tương tác (chỉ đo lúc tải).
 - Vùng chạm trong React Flow (handle 6–8 px) được miễn vì là của thư viện — trên điện thoại vẫn khó kéo edge.

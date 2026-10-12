@@ -14,8 +14,11 @@ defaults:
     working-directory: web
 
 env:
-  # DB SQLite riêng cho CI; KHÔNG có ANTHROPIC_API_KEY → không gọi Claude thật.
-  DATABASE_URL: file:./test.db
+  # Postgres riêng cho CI (service postgres:16 ở job e2e, database seo_test, schema seo) — KHÔNG trỏ Supabase.
+  # Job check chỉ cần biến có mặt cho `prisma generate`/build (không truy vấn DB). KHÔNG có ANTHROPIC_API_KEY → không gọi Claude thật.
+  DATABASE_URL: postgresql://seo:seo@localhost:5432/seo_test?schema=seo
+  DIRECT_URL: postgresql://seo:seo@localhost:5432/seo_test?schema=seo
+  E2E_DATABASE_URL: postgresql://seo:seo@localhost:5432/seo_test?schema=seo
   ANTHROPIC_API_KEY: ""
   ENABLE_WEB_SEARCH: "false"
   NEXT_TELEMETRY_DISABLED: "1"
@@ -46,6 +49,19 @@ jobs:
     runs-on: ubuntu-latest
     needs: check
     timeout-minutes: 50
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: seo
+          POSTGRES_PASSWORD: seo
+          POSTGRES_DB: seo_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U seo -d seo_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
