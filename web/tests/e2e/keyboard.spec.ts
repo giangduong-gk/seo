@@ -79,24 +79,25 @@ for (const p of UX_PAGES) {
   test(`keyboard: Escape đóng menu/popup — ${p.name}`, async ({ page }, testInfo) => {
     const { url } = await gotoUx(page, p);
     await settle(page);
-    // ứng viên: nút toggle aria-expanded=false (menu) — đánh dấu trước vì aria-expanded đổi sau khi bấm
-    const nToggle = await page.evaluate(() => {
-      const els = Array.from(document.querySelectorAll('main [aria-expanded="false"]:not([role="combobox"]), header [aria-expanded="false"]'))
-        .filter((el) => window.__ux.visible(el) && !window.__ux.inThirdParty(el)).slice(0, 5);
-      els.forEach((el, i) => el.setAttribute("data-ux-toggle", String(i)));
-      return els.length;
-    });
+    // ứng viên: nút toggle aria-expanded=false (menu) — giữ ElementHandle (chụp trước vì aria-expanded đổi sau khi bấm).
+    // KHÔNG gắn thuộc tính đánh dấu vào DOM: nếu React hydrate muộn (dev server biên dịch route lần đầu), thuộc tính lạ
+    // gây cảnh báo hydration mismatch → console.error → fixture fail.
+    const toggleList = await page.evaluateHandle(() =>
+      Array.from(document.querySelectorAll('main [aria-expanded="false"]:not([role="combobox"]), header [aria-expanded="false"]'))
+        .filter((el) => window.__ux.visible(el) && !window.__ux.inThirdParty(el)).slice(0, 5));
+    const nToggle = await toggleList.evaluate((els) => els.length);
     const details = page.locator("details").filter({ visible: true });
     const failures: unknown[] = [];
     const info: unknown[] = [];
     for (let i = 0; i < nToggle; i++) {
-      const t = page.locator(`[data-ux-toggle="${i}"]`);
+      const t = (await toggleList.evaluateHandle((els, idx) => els[idx], i)).asElement();
+      if (!t) continue;
       if (!(await t.isVisible().catch(() => false))) continue;
-      const label = ((await t.getAttribute("aria-label", { timeout: 2000 })) ?? (await t.innerText({ timeout: 2000 }))).slice(0, 40);
+      const label = ((await t.getAttribute("aria-label")) ?? (await t.innerText())).slice(0, 40);
       await t.click({ timeout: 5000 }).catch(() => {});
-      if ((await t.getAttribute("aria-expanded", { timeout: 2000 }).catch(() => null)) !== "true") continue; // không phải toggle thật
+      if ((await t.getAttribute("aria-expanded").catch(() => null)) !== "true") continue; // không phải toggle thật
       await page.keyboard.press("Escape");
-      const closed = (await t.getAttribute("aria-expanded", { timeout: 2000 }).catch(() => "false")) === "false";
+      const closed = (await t.getAttribute("aria-expanded").catch(() => "false")) === "false";
       if (!closed) { failures.push({ kind: "aria-expanded", label }); await t.click({ timeout: 5000 }).catch(() => {}); }
     }
     const nDetails = Math.min(await details.count(), 5);
