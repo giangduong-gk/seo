@@ -1,0 +1,23 @@
+{
+  "name": "rankmind",
+  "version": "0.4.0",
+  "private": true,
+  "description": "RankMind — AI SEO & GEO Content Studio (Claude + Next.js + Supabase)",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "npm --prefix apps/web ci && node -e \"const fs=require('fs');const t='apps/web/.env';if(!fs.existsSync(t)){fs.copyFileSync('apps/web/.env.example',t);console.log('Đã tạo',t,'— hãy điền ANTHROPIC_API_KEY')}\"",
+    "dev": "npm --prefix apps/web run dev",
+    "build": "npm --prefix apps/web run build",
+    "start": "npm --prefix apps/web run start",
+    "check": "npm --prefix apps/web run check",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "test": "npm --prefix apps/web test",
+    "test:e2e": "npm --prefix apps/web run test:e2e",
+    "lint:tokens": "npm --prefix apps/web run lint:tokens",
+    "db:generate": "npm --prefix apps/web run db:generate",
+    "db:migrate": "npm --prefix apps/web run db:migrate",
+    "db:seed": "npm --prefix apps/web run db:seed"
+  }
+}
